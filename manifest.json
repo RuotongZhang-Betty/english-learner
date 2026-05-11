@@ -1,0 +1,13 @@
+{
+  "name": "英语听读学习",
+  "short_name": "英语听读",
+  "description": "英语文本朗读、双语对照、生词本学习工具",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4F46E5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="英语听读">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>英语听读学习</title>
+<style>
+:root {
+  --p:#4F46E5;--pl:#EEF2FF;--p2:#4338CA;
+  --g:#10B981;--g2:#059669;
+  --bg:#F8FAFC;--sur:#FFFFFF;
+  --tx:#1E293B;--mu:#64748B;--bd:#E2E8F0;
+  --hw:#FDE68A;--hs:#DBEAFE;
+  --pu:#7C3AED;
+  --m0bg:#FEF3C7;--m0tx:#92400E;
+  --m1bg:#DBEAFE;--m1tx:#1E40AF;
+  --m2bg:#D1FAE5;--m2tx:#065F46;
+  --warn:#F59E0B;--err:#EF4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* Header */
+header{background:var(--sur);border-bottom:1px solid var(--bd);padding:10px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+header h1{font-size:16px;font-weight:700;color:var(--p)}
+.hdr-r{display:flex;align-items:center;gap:10px;margin-left:auto}
+.status{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mu)}
+.dot{width:7px;height:7px;border-radius:50%;background:#CBD5E1;flex-shrink:0}
+.dot.play{background:var(--g);animation:pulse 1.2s ease infinite}
+.dot.pause{background:var(--warn)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.timer{font-size:12px;font-weight:700;color:var(--p);font-variant-numeric:tabular-nums}
+.eng-tag{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.eng-tag.azure{background:#E0F2FE;color:#0369A1}
+.eng-tag.browser{background:#F1F5F9;color:var(--mu)}
+.pwa-btn{font-size:12px;background:var(--pl);color:var(--p);border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;font-weight:500;display:none}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:1fr 310px;grid-template-rows:1fr auto;flex:1;overflow:hidden}
+
+/* Text panel */
+.tp{padding:16px;overflow-y:auto;border-right:1px solid var(--bd)}
+textarea#ti{width:100%;min-height:220px;border:2px dashed var(--bd);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;resize:vertical;outline:none;font-family:inherit;color:var(--tx);background:var(--sur);transition:border-color .2s}
+textarea#ti:focus{border-color:var(--p)}
+.input-bar{display:flex;gap:8px;margin-top:10px;align-items:center}
+.input-bar-r{margin-left:auto;display:flex;gap:8px}
+#saveForm{margin-top:8px}
+.sf-row{display:flex;gap:8px;align-items:center}
+.sf-row input[type=text]{flex:1;border:1px solid var(--bd);border-radius:7px;padding:7px 10px;font-size:13px;outline:none;font-family:inherit}
+.sf-row input[type=text]:focus{border-color:var(--p)}
+
+.disp-tb{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.mode-tog{display:flex;border:1px solid var(--bd);border-radius:7px;overflow:hidden}
+.mb-btn{padding:5px 11px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:500;color:var(--mu);font-family:inherit;transition:all .15s;white-space:nowrap}
+.mb-btn.on{background:var(--p);color:#fff}
+.meta-i{font-size:12px;color:var(--mu);margin-left:auto}
+
+.sent-block{margin-bottom:8px}
+.sent-en{font-size:17px;line-height:2.1}
+.sent-en.hl{background:var(--hs);border-radius:4px;padding:0 3px}
+.sent-cn{font-size:13px;color:var(--pu);line-height:1.6;border-left:3px solid #DDD6FE;padding-left:10px;margin-top:1px}
+.sent-cn.ld{color:var(--mu);font-style:italic}
+.sent-cn.hid{display:none}
+.word{display:inline;cursor:pointer;border-radius:3px;padding:1px 2px;transition:background .12s}
+.word:hover{background:#F1F5F9}
+.word.hl{background:var(--hw)}
+.word.sv{border-bottom:2px solid var(--g)}
+
+/* Sidebar */
+.sb{background:var(--sur);display:flex;flex-direction:column;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--bd);flex-shrink:0}
+.tab{flex:1;padding:9px 4px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:500;color:var(--mu);border-bottom:2px solid transparent;transition:all .15s;font-family:inherit}
+.tab.on{color:var(--p);border-bottom-color:var(--p)}
+.sb-body{flex:1;overflow-y:auto;padding:14px}
+
+/* Settings */
+.sg{margin-bottom:14px}
+.sl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:5px;display:block}
+select,input[type=number],input[type=password]{width:100%;border:1px solid var(--bd);border-radius:7px;padding:6px 10px;font-size:13px;background:var(--sur);color:var(--tx);outline:none;font-family:inherit}
+select:focus,input[type=number]:focus,input[type=password]:focus{border-color:var(--p)}
+input[type=number]{width:78px}
+.sp-row{display:flex;align-items:center;gap:8px}
+.sp-row input[type=range]{flex:1;accent-color:var(--p);cursor:pointer}
+.spv{font-size:13px;font-weight:700;color:var(--p);min-width:34px}
+.pbar{height:5px;background:var(--bd);border-radius:3px;overflow:hidden;margin-top:5px}
+.pfil{height:100%;background:var(--p);transition:width .3s;width:0}
+.ptxt{font-size:12px;color:var(--mu);margin-top:4px}
+hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
+
+/* Engine toggle */
+.eng-opts{display:flex;flex-direction:column;gap:6px}
+.eng-opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1.5px solid var(--bd);border-radius:8px;cursor:pointer;transition:all .15s}
+.eng-opt:hover{border-color:#CBD5E1}
+.eng-opt.sel{border-color:var(--p);background:var(--pl)}
+.eng-opt input[type=radio]{margin-top:2px;accent-color:var(--p);width:auto;padding:0;border:none}
+.eng-opt-tx{font-size:13px;font-weight:500;line-height:1.4}
+.eng-opt-sub{font-size:11px;color:var(--mu);margin-top:2px}
+
+/* Azure config box */
+.az-box{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px;margin-top:10px}
+.az-box .sg{margin-bottom:10px}
+.az-box .sg:last-child{margin-bottom:0}
+
+/* Usage bar */
+.usage-wrap{margin-top:4px}
+.usage-bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden;margin-bottom:5px}
+.usage-fill{height:100%;background:var(--g);transition:width .4s;width:0;border-radius:4px}
+.usage-fill.warn{background:var(--warn)}
+.usage-fill.crit{background:var(--err)}
+.usage-nums{font-size:12px;color:var(--mu);margin-bottom:3px}
+.usage-est{font-size:11px;color:var(--mu)}
+.usage-alert{font-size:11px;padding:5px 8px;border-radius:6px;margin-top:6px;display:none}
+.usage-alert.warn{background:#FEF3C7;color:#92400E;display:block}
+.usage-alert.crit{background:#FEE2E2;color:#991B1B;display:block}
+
+/* Library */
+.lib-row{display:flex;gap:6px;margin-bottom:12px}
+.lib-row input[type=text]{flex:1;border:1px solid var(--bd);border-radius:7px;padding:6px 10px;font-size:13px;outline:none;font-family:inherit}
+.lib-row input[type=text]:focus{border-color:var(--p)}
+.snip{border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:all .15s;position:relative}
+.snip:hover{border-color:var(--p);background:var(--pl)}
+.snip.act{border-color:var(--p);background:var(--pl)}
+.snip-n{font-size:13px;font-weight:600;padding-right:22px}
+.snip-p{font-size:11px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.snip-d{font-size:10px;color:#CBD5E1;margin-top:4px}
+.snip-x{position:absolute;top:7px;right:7px;background:none;border:none;cursor:pointer;color:#CBD5E1;font-size:15px;padding:2px 4px;border-radius:3px;line-height:1;font-family:inherit;transition:all .15s}
+.snip-x:hover{background:#FEE2E2;color:var(--err)}
+.lib-empty{text-align:center;color:var(--mu);padding:28px 0;font-size:13px}
+
+/* Tag chips */
+.tag-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;line-height:1.4;white-space:nowrap;cursor:default}
+.tag-x{opacity:.55;cursor:pointer;font-size:12px;font-style:normal;margin-left:1px}
+.tag-x:hover{opacity:1}
+
+/* Tag filter bar */
+.tag-bar-wrap{margin-bottom:8px}
+.tag-bar-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:5px}
+.tag-bar{display:flex;flex-wrap:wrap;gap:5px}
+.tf-chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:all .15s;white-space:nowrap}
+.tf-chip.sel{border-color:currentColor}
+.tf-clear{background:#FEE2E2;color:#991B1B;border:none;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.tf-clear:hover{background:#FCA5A5}
+
+/* Tag add */
+.vc-tags{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:7px}
+.tag-add-btn{font-size:11px;padding:2px 7px;border-radius:20px;border:1.5px dashed #CBD5E1;background:none;cursor:pointer;color:var(--mu);font-family:inherit;transition:all .15s;line-height:1.4}
+.tag-add-btn:hover{border-color:var(--p);color:var(--p)}
+.tag-iw{position:relative;display:inline-flex}
+.tag-input{font-size:12px;padding:2px 10px;border:1.5px solid var(--p);border-radius:20px;outline:none;width:90px;font-family:inherit;background:var(--pl)}
+.tag-sug{position:absolute;top:calc(100% + 4px);left:0;background:var(--sur);border:1px solid var(--bd);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:50;min-width:110px;overflow:hidden;display:none}
+.tag-sug-item{padding:6px 10px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.tag-sug-item:hover{background:var(--pl)}
+
+/* Translation engine panel */
+.teng{border:1px solid var(--bd);border-radius:8px;padding:10px 11px;margin-bottom:7px;transition:border-color .2s,background .2s}
+.teng.t-active{border-color:var(--g);background:#F0FDF4}
+.teng.t-warn{border-color:var(--warn);background:#FFFBEB}
+.teng.t-off{opacity:.6}
+.teng-hdr{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.teng-num{width:18px;height:18px;border-radius:50%;background:var(--bd);color:var(--mu);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.teng.t-active .teng-num{background:var(--g);color:#fff}
+.teng.t-warn .teng-num{background:var(--warn);color:#fff}
+.teng-name{font-size:13px;font-weight:600;flex:1}
+.teng-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#F1F5F9;color:var(--mu);white-space:nowrap}
+.trans-active-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:#F1F5F9;color:var(--mu)}
+.trans-active-badge.on-az{background:#DCFCE7;color:#166534}
+.trans-active-badge.on-mm{background:#F1F5F9;color:var(--mu)}
+
+/* Vocab */
+.review-btn{width:100%;padding:9px;border:1.5px dashed var(--p);border-radius:8px;background:var(--pl);color:var(--p);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px;transition:all .15s}
+.review-btn:hover{background:var(--p);color:#fff}
+.review-btn:disabled{border-color:var(--bd);background:var(--bg);color:var(--mu);cursor:not-allowed}
+.stat-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.sc{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .15s;white-space:nowrap}
+.sc.all{background:#F1F5F9;color:var(--mu)}.sc.sc0{background:var(--m0bg);color:var(--m0tx)}.sc.sc1{background:var(--m1bg);color:var(--m1tx)}.sc.sc2{background:var(--m2bg);color:var(--m2tx)}.sc.on{border-color:currentColor}
+.voc-ctrl{margin-bottom:10px}
+.voc-search{width:100%;border:1px solid var(--bd);border-radius:7px;padding:7px 10px;font-size:13px;outline:none;font-family:inherit;margin-bottom:8px}
+.voc-search:focus{border-color:var(--p)}
+.voc-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.voc-bar select{width:auto;padding:4px 8px;font-size:12px}
+.vc{border:1px solid var(--bd);border-radius:9px;padding:11px 12px;margin-bottom:8px}
+.vc-top{display:flex;align-items:flex-start;gap:6px;margin-bottom:3px}
+.vc-word{font-size:15px;font-weight:700;flex:1}
+.vc-ph{font-size:11px;color:var(--mu);margin-bottom:3px}
+.vc-cn{font-size:13px;color:var(--pu);font-weight:500;margin-bottom:2px}
+.vc-def{font-size:12px;color:var(--mu);line-height:1.5;margin-bottom:3px}
+.vc-date{font-size:10px;color:#CBD5E1}
+.mbadge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.mbadge:hover{opacity:.8}
+.mb0{background:var(--m0bg);color:var(--m0tx)}.mb1{background:var(--m1bg);color:var(--m1tx)}.mb2{background:var(--m2bg);color:var(--m2tx)}
+.vc-del{background:none;border:none;cursor:pointer;color:#CBD5E1;font-size:15px;padding:2px 4px;border-radius:3px;font-family:inherit;transition:all .15s;margin-left:2px}
+.vc-del:hover{background:#FEE2E2;color:var(--err)}
+.voc-empty{text-align:center;color:var(--mu);padding:32px 0;font-size:13px}
+.voc-empty .ei{font-size:30px;margin-bottom:8px}
+
+/* Controls bar */
+.cbar{grid-column:1/-1;background:var(--sur);border-top:1px solid var(--bd);padding:14px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap;box-shadow:0 -1px 6px rgba(0,0,0,.06);flex-shrink:0}
+.pbtn{width:50px;height:50px;border-radius:50%;background:var(--p);color:#fff;border:none;cursor:pointer;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;padding-left:3px}
+.pbtn.paused{padding-left:0}
+.pbtn:hover:not(:disabled){background:var(--p2);transform:scale(1.06)}
+.pbtn:disabled{background:#CBD5E1;cursor:not-allowed}
+.stpbtn{width:40px;height:40px;border-radius:9px;background:#F1F5F9;color:var(--tx);border:none;cursor:pointer;font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.stpbtn:hover:not(:disabled){background:#FEE2E2;color:var(--err)}
+.stpbtn:disabled{opacity:.4;cursor:not-allowed}
+.ctl{padding:8px 14px;border:1px solid var(--bd);border-radius:8px;background:var(--sur);color:var(--tx);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;font-family:inherit;white-space:nowrap}
+.ctl:hover:not(:disabled){border-color:var(--p);color:var(--p)}
+.ctl:disabled{opacity:.4;cursor:not-allowed}
+.mbadge2{font-size:12px;background:var(--pl);color:var(--p);padding:4px 10px;border-radius:20px;font-weight:500;white-space:nowrap}
+.hint{font-size:11px;color:#CBD5E1;margin-left:auto}
+
+/* Buttons */
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;font-family:inherit}
+.btn-p{background:var(--p);color:#fff}.btn-p:hover{background:var(--p2)}
+.btn-s{background:var(--bd);color:var(--tx)}.btn-s:hover{background:#CBD5E1}
+.btn-g{background:var(--g);color:#fff}.btn-g:hover{background:var(--g2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+/* Word popup */
+.ov{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:200;display:none;backdrop-filter:blur(1px)}
+.pop{position:fixed;background:var(--sur);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.06);padding:18px 20px;z-index:201;width:350px;max-width:calc(100vw - 20px);max-height:80vh;overflow-y:auto;display:none}
+.pop-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.pop-word{font-size:26px;font-weight:800;color:var(--p)}
+.pop-ph{font-size:13px;color:var(--mu);margin-top:2px}
+.pop-x{background:none;border:none;cursor:pointer;color:var(--mu);font-size:17px;padding:2px 6px;border-radius:5px;font-family:inherit}
+.pop-x:hover{background:var(--bd)}
+.pop-sec{margin-bottom:10px}
+.pop-tit{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:5px}
+.def-it{padding:5px 0;border-bottom:1px solid var(--bd);font-size:13px;line-height:1.6}
+.def-it:last-child{border-bottom:none}
+.pos{display:inline-block;background:var(--pl);color:var(--p);font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-right:5px}
+.def-ex{font-size:11px;color:var(--mu);font-style:italic;margin-top:2px}
+.pop-cn{font-size:16px;color:var(--pu);font-weight:600}
+.pop-ld{color:var(--mu);font-size:13px}
+.pop-acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)}
+
+/* Flashcard */
+.fc-ov{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.fc-box{background:var(--sur);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.25);width:440px;max-width:calc(100vw - 24px);overflow:hidden}
+.fc-hdr{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid var(--bd)}
+.fc-title{font-size:14px;font-weight:700;flex:1}
+.fc-prog{font-size:12px;color:var(--mu);margin-right:10px}
+.fc-close{background:none;border:none;cursor:pointer;color:var(--mu);font-size:17px;padding:2px 6px;border-radius:5px;font-family:inherit}
+.fc-close:hover{background:var(--bd)}
+.fc-pb{height:3px;background:var(--bd)}
+.fc-pbf{height:100%;background:var(--p);transition:width .3s}
+.fc-card{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;cursor:pointer;text-align:center;user-select:none;transition:background .2s}
+.fc-card:hover{background:#FAFAFA}
+.fc-word{font-size:34px;font-weight:800;color:var(--p);margin-bottom:5px}
+.fc-ph{font-size:14px;color:var(--mu);margin-bottom:10px}
+.fc-hint{font-size:11px;color:#CBD5E1}
+.fc-div{width:50px;height:2px;background:var(--bd);margin:12px auto}
+.fc-cn{font-size:19px;color:var(--pu);font-weight:600;margin-bottom:6px}
+.fc-def{font-size:12px;color:var(--mu);line-height:1.6;max-width:300px}
+.fc-acts{display:flex;border-top:1px solid var(--bd)}
+.fc-act{flex:1;padding:13px 6px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:background .15s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.fc-act:not(:last-child){border-right:1px solid var(--bd)}
+.fc-act:hover{background:var(--bg)}
+.fc-act span{font-size:10px;font-weight:400;color:var(--mu)}
+.fc-act.a0{color:var(--m0tx)}.fc-act.a0:hover{background:var(--m0bg)}
+.fc-act.a1{color:var(--m1tx)}.fc-act.a1:hover{background:var(--m1bg)}
+.fc-act.a2{color:var(--m2tx)}.fc-act.a2:hover{background:var(--m2bg)}
+.fc-nav{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--bd);justify-content:center}
+</style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:19px">🎧</span>
+  <h1>英语听读学习</h1>
+  <div class="hdr-r">
+    <span class="eng-tag browser" id="engTag">浏览器语音</span>
+    <button class="pwa-btn" id="installBtn" onclick="installPWA()">📲 安装</button>
+    <div class="status">
+      <div class="dot" id="dot"></div>
+      <span id="stxt">就绪</span>
+      <span class="timer" id="timerEl" style="display:none"></span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Text panel -->
+  <div class="tp">
+    <div id="inputMode">
+      <textarea id="ti" placeholder="在此输入或粘贴英文文本…"></textarea>
+      <div class="input-bar">
+        <button class="btn btn-s btn-sm" onclick="clearInput()">清空</button>
+        <div class="input-bar-r">
+          <button class="btn btn-s btn-sm" onclick="toggleSF()">保存到文本库</button>
+          <button class="btn btn-p" onclick="loadText()">加载文本 →</button>
+        </div>
+      </div>
+      <div id="saveForm" style="display:none">
+        <div class="sf-row" style="margin-top:8px">
+          <input type="text" id="snipName" placeholder="命名（如：片段一）">
+          <button class="btn btn-p btn-sm" onclick="confirmSave()">保存</button>
+          <button class="btn btn-s btn-sm" onclick="hideSF()">取消</button>
+        </div>
+      </div>
+    </div>
+    <div id="displayMode" style="display:none">
+      <div class="disp-tb">
+        <button class="btn btn-s btn-sm" onclick="backToInput()">← 编辑</button>
+        <button class="btn btn-s btn-sm" onclick="toggleDSF()">💾 保存</button>
+        <div class="mode-tog">
+          <button class="mb-btn on" data-m="en" onclick="setDM('en')">仅英文</button>
+          <button class="mb-btn" data-m="bi" onclick="setDM('bi')">中英双语</button>
+          <button class="mb-btn" data-m="cn" onclick="setDM('cn')">仅中文</button>
+        </div>
+        <span class="meta-i" id="metaI"></span>
+      </div>
+      <div id="dispSaveForm" style="display:none">
+        <div class="sf-row" style="margin-top:8px">
+          <input type="text" id="dSnipName" placeholder="命名（如：片段一）">
+          <button class="btn btn-p btn-sm" onclick="confirmDSave()">保存</button>
+          <button class="btn btn-s btn-sm" onclick="hideDSF()">取消</button>
+        </div>
+      </div>
+      <div id="textDisplay"></div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sb">
+    <div class="tabs">
+      <button class="tab on" onclick="switchTab('set')">设置</button>
+      <button class="tab" onclick="switchTab('lib')">文本库<span id="libB"></span></button>
+      <button class="tab" onclick="switchTab('voc')">生词本<span id="vocB"></span></button>
+    </div>
+    <div class="sb-body">
+
+      <!-- Settings tab -->
+      <div id="tabSet">
+        <div class="sg">
+          <label class="sl">播放速度</label>
+          <div class="sp-row">
+            <input type="range" id="spSlider" min="0.5" max="2" step="0.1" value="1" oninput="onSpeed(this.value)">
+            <span class="spv" id="spV">1.0x</span>
+          </div>
+        </div>
+
+        <div class="sg">
+          <label class="sl">播放模式</label>
+          <select id="modeSel" onchange="onMode(this.value)">
+            <option value="once">一次性播放</option>
+            <option value="shadow">影子跟读</option>
+            <option value="loop">循环播放</option>
+            <option value="ntimes">播放 N 次</option>
+            <option value="timed">按时间播放</option>
+          </select>
+        </div>
+        <div class="sg" id="gN" style="display:none">
+          <label class="sl">播放次数</label>
+          <input type="number" id="nIn" value="3" min="1" max="99">
+        </div>
+        <div class="sg" id="gT" style="display:none">
+          <label class="sl">播放时长</label>
+          <select id="timeSel" style="width:100%">
+            <option value="10">10 分钟</option><option value="20">20 分钟</option>
+            <option value="30">30 分钟</option><option value="45">45 分钟</option>
+            <option value="60">1 小时</option><option value="90">1.5 小时</option>
+            <option value="120">2 小时</option>
+          </select>
+        </div>
+        <div class="sg" id="gS" style="display:none">
+          <label class="sl">跟读间隔（秒）</label>
+          <input type="number" id="shIn" value="3" min="1" max="15">
+        </div>
+
+        <hr class="div">
+
+        <!-- Voice engine -->
+        <div class="sg">
+          <label class="sl">语音引擎</label>
+          <div class="eng-opts">
+            <label class="eng-opt" id="optBrowser" onclick="setEngine('browser')">
+              <input type="radio" name="eng" value="browser" checked>
+              <div>
+                <div class="eng-opt-tx">浏览器内置</div>
+                <div class="eng-opt-sub">完全免费 · 无需配置 · 离线可用</div>
+              </div>
+            </label>
+            <label class="eng-opt" id="optAzure" onclick="setEngine('azure')">
+              <input type="radio" name="eng" value="azure">
+              <div>
+                <div class="eng-opt-tx">Azure 神经语音 ✨</div>
+                <div class="eng-opt-sub">更自然 · 免费 50 万字/月</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Browser voice select (shown in browser mode) -->
+        <div class="sg" id="browserVoiceBox">
+          <label class="sl">选择语音</label>
+          <select id="voiceSel"></select>
+        </div>
+
+        <!-- Azure config (shown in azure mode) -->
+        <div class="az-box" id="azureBox" style="display:none">
+          <div class="sg">
+            <label class="sl">API Key</label>
+            <input type="password" id="azKey" placeholder="粘贴 Azure 订阅密钥" oninput="saveAzCfg()">
+          </div>
+          <div class="sg">
+            <label class="sl">区域 Region</label>
+            <select id="azRegion" onchange="saveAzCfg()">
+              <option value="eastasia">东亚 East Asia（推荐）</option>
+              <option value="southeastasia">东南亚 SE Asia</option>
+              <option value="eastus">美国东部 East US</option>
+              <option value="westeurope">西欧 West Europe</option>
+              <option value="japaneast">日本东部 Japan East</option>
+              <option value="australiaeast">澳大利亚 Australia</option>
+            </select>
+          </div>
+          <div class="sg">
+            <label class="sl">声音</label>
+            <select id="azVoice" onchange="saveAzCfg()">
+              <optgroup label="英式英语 (推荐)">
+                <option value="en-GB-SoniaNeural">Sonia — 女声 英式</option>
+                <option value="en-GB-RyanNeural">Ryan — 男声 英式</option>
+                <option value="en-GB-LibbyNeural">Libby — 女声 英式</option>
+                <option value="en-GB-OliverNeural">Oliver — 男声 英式</option>
+              </optgroup>
+              <optgroup label="美式英语">
+                <option value="en-US-JennyNeural">Jenny — 女声 美式</option>
+                <option value="en-US-GuyNeural">Guy — 男声 美式</option>
+                <option value="en-US-AriaNeural">Aria — 女声 美式</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="sg">
+            <label class="sl">本月用量（自动月初重置）</label>
+            <div class="usage-wrap">
+              <div class="usage-bar"><div class="usage-fill" id="uFill"></div></div>
+              <div class="usage-nums" id="uNums">—</div>
+              <div class="usage-est" id="uEst"></div>
+              <div class="usage-alert" id="uAlert"></div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--mu);line-height:1.6">
+            💡 相同语音已自动缓存，循环播放不再消耗额度。<br>
+            切换速度也不影响缓存。超过 <b>95%</b> 时自动切回浏览器语音。
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+            <span style="font-size:11px;color:var(--mu)" id="cacheStats">正在统计缓存…</span>
+            <button onclick="clearAllCache()" style="font-size:11px;padding:3px 8px;border:1px solid var(--bd);border-radius:5px;background:none;cursor:pointer;color:var(--mu);font-family:inherit">清除缓存</button>
+          </div>
+        </div>
+
+        <hr class="div">
+
+        <!-- Smart translation engines -->
+        <div class="sg">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <label class="sl" style="margin:0">翻译引擎</label>
+            <div class="trans-active-badge" id="transActiveBadge">—</div>
+          </div>
+
+          <!-- Engine 1: Azure Translator -->
+          <div class="teng" id="tengAz">
+            <div class="teng-hdr">
+              <span class="teng-num">1</span>
+              <span class="teng-name">Azure 翻译</span>
+              <span class="teng-badge" id="azTransBadge">未配置</span>
+            </div>
+            <input type="password" id="azTransKey" placeholder="粘贴 Azure 翻译 Key" oninput="saveTransCfg()" style="margin-bottom:6px">
+            <div style="font-size:11px;margin-bottom:5px">
+              <a onclick="copyTTSKey()" style="color:var(--p);cursor:pointer;text-decoration:underline">↑ 使用与语音相同的 Key</a>
+              <span style="color:var(--mu);margin-left:6px">免费 200 万字/月</span>
+            </div>
+            <div class="usage-bar" id="azTransBarWrap" style="display:none">
+              <div class="usage-fill" id="azTransFill"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+              <span style="font-size:11px;color:var(--mu)" id="azTransNums"></span>
+              <span style="font-size:11px;color:var(--mu)" id="azTransEst"></span>
+            </div>
+            <div class="usage-alert" id="azTransAlert"></div>
+          </div>
+
+          <!-- Engine 2: MyMemory (always available) -->
+          <div class="teng" id="tengMM">
+            <div class="teng-hdr">
+              <span class="teng-num">2</span>
+              <span class="teng-name">MyMemory</span>
+              <span class="teng-badge" id="mmBadge">免费备用</span>
+            </div>
+            <div style="font-size:11px;color:var(--mu)">完全免费 · 无需配置 · 自动备用</div>
+          </div>
+
+          <!-- Auto-switch threshold -->
+          <div style="font-size:11px;color:var(--mu);margin-top:8px;display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+            Azure 用量超过
+            <input type="number" id="transSwitchPct" value="90" min="50" max="99"
+              style="width:46px;padding:3px 5px;border:1px solid var(--bd);border-radius:5px;font-size:12px;text-align:center"
+              oninput="saveTransCfg()">
+            % 时自动切到 MyMemory
+          </div>
+        </div>
+
+        <hr class="div">
+        <div class="sg">
+          <label class="sl">当前进度</label>
+          <div class="pbar"><div class="pfil" id="pFil"></div></div>
+          <div class="ptxt" id="pTxt">— / — 句</div>
+        </div>
+      </div>
+
+      <!-- Library tab -->
+      <div id="tabLib" style="display:none">
+        <div class="lib-row">
+          <input type="text" id="libIn" placeholder="命名后保存当前文本">
+          <button class="btn btn-p btn-sm" onclick="saveFromLib()">保存</button>
+        </div>
+        <div id="snipList"></div>
+        <div class="lib-empty" id="libEmp">还没有保存的文本片段</div>
+      </div>
+
+      <!-- Vocab tab -->
+      <div id="tabVoc" style="display:none">
+        <button class="review-btn" id="reviewBtn" onclick="startReview()" disabled>🃏 开始闪卡复习</button>
+        <div class="stat-chips" id="statChips"></div>
+        <div class="tag-bar-wrap" id="tagBarWrap" style="display:none">
+          <div class="tag-bar-label">按标签筛选</div>
+          <div class="tag-bar" id="tagBar"></div>
+        </div>
+        <div class="voc-ctrl">
+          <input class="voc-search" id="vocSearch" placeholder="搜索单词或中文…" oninput="onVocSearch(this.value)">
+          <div class="voc-bar">
+            <label style="font-size:11px;color:var(--mu)">排序：</label>
+            <select id="vocSort" onchange="renderVocab()">
+              <option value="date">最新加入</option>
+              <option value="az">A → Z</option>
+              <option value="mastery">按熟练度</option>
+            </select>
+            <button class="btn btn-s btn-sm" onclick="exportVocab()" style="margin-left:auto">导出</button>
+          </div>
+        </div>
+        <div id="vocList"></div>
+        <div class="voc-empty" id="vocEmp" style="display:none">
+          <div class="ei">📖</div>
+          <div>还没有收录单词</div>
+          <div style="margin-top:5px;font-size:12px">点击文章中的单词即可查询添加</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="cbar">
+    <div style="display:flex;align-items:center;gap:4px">
+      <button class="pbtn" id="playBtn" onclick="togglePlay()" disabled title="Space">▶</button>
+      <button class="stpbtn" id="stopBtn" onclick="stopPlay()" disabled title="停止并归位">⏹</button>
+    </div>
+    <button class="ctl" id="prevBtn" onclick="prevSent()" disabled>⏮ 上一句</button>
+    <button class="ctl" id="nextBtn" onclick="nextSent()" disabled>下一句 ⏭</button>
+    <span class="mbadge2" id="mBadge" style="display:none"></span>
+    <span class="hint">Space 播放/暂停 · ⏹ 停止 · ← → 切换句</span>
+  </div>
+
+</div>
+
+<!-- Word popup -->
+<div class="ov" id="ov" onclick="closePop()"></div>
+<div class="pop" id="pop">
+  <div class="pop-top">
+    <div><div class="pop-word" id="pWord"></div><div class="pop-ph" id="pPh"></div></div>
+    <button class="pop-x" onclick="closePop()">✕</button>
+  </div>
+  <div class="pop-sec"><div class="pop-tit">英文释义</div><div id="pDefs"><span class="pop-ld">加载中…</span></div></div>
+  <div class="pop-sec"><div class="pop-tit">中文翻译</div><div class="pop-cn" id="pCN">加载中…</div></div>
+  <div class="pop-acts">
+    <button class="btn btn-g" id="addVBtn" onclick="addCurWord()">+ 加入生词本</button>
+    <button class="btn btn-s" onclick="speakCur()">🔊 朗读</button>
+    <button class="btn btn-s" onclick="closePop()">关闭</button>
+  </div>
+</div>
+
+<!-- Flashcard -->
+<div class="fc-ov" id="fcOv">
+  <div class="fc-box">
+    <div class="fc-hdr">
+      <span class="fc-title">🃏 闪卡复习</span>
+      <span class="fc-prog" id="fcProg"></span>
+      <button class="fc-close" onclick="closeReview()">✕</button>
+    </div>
+    <div class="fc-pb"><div class="fc-pbf" id="fcPBF"></div></div>
+    <div class="fc-card" id="fcCard" onclick="flipCard()">
+      <div id="fcFront">
+        <div class="fc-word" id="fcWord"></div>
+        <div class="fc-ph" id="fcPh"></div>
+        <div class="fc-hint">点击查看翻译</div>
+      </div>
+      <div id="fcBack" style="display:none;text-align:center;width:100%">
+        <div class="fc-word" id="fcWord2"></div>
+        <div class="fc-ph" id="fcPh2"></div>
+        <div class="fc-div"></div>
+        <div class="fc-cn" id="fcCN"></div>
+        <div class="fc-def" id="fcDef"></div>
+      </div>
+    </div>
+    <div class="fc-acts">
+      <button class="fc-act a0" onclick="rateCard(0)">还不会<span>学习中</span></button>
+      <button class="fc-act a1" onclick="rateCard(1)">有印象<span>熟悉</span></button>
+      <button class="fc-act a2" onclick="rateCard(2)">完全认识<span>已掌握</span></button>
+    </div>
+    <div class="fc-nav">
+      <button class="btn btn-s btn-sm" onclick="fcPrev()">← 上一个</button>
+      <button class="btn btn-s btn-sm" onclick="fcSkip()">跳过</button>
+      <button class="btn btn-s btn-sm" onclick="fcNext()">下一个 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════ PERSISTENCE ═══════════════════════════
+function ld(k,d){ try{ return JSON.parse(localStorage.getItem(k)||'null')??d; }catch{ return d; } }
+function sv(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+
+// ═══════════════════════════ CACHE ═══════════════════════════
+// Translation cache — localStorage, persists forever
+let TC = ld('tc', {});
+function getCT(text){ return TC[text] ?? null; }
+function setCT(text, cn){
+  TC[text] = cn;
+  try{ sv('tc', TC); } catch(e){
+    // localStorage full: keep only last 500 entries
+    const keys = Object.keys(TC);
+    keys.slice(0, keys.length - 500).forEach(k => delete TC[k]);
+    try{ sv('tc', TC); } catch{}
+  }
+}
+
+// Audio cache — Cache API, persists across sessions
+const AC = 'az-audio-v1';
+function audioKey(text){ return hashStr(S.azCfg.voice + '|' + text); }
+function hashStr(s){
+  let h = 5381;
+  for(let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
+  return Math.abs(h).toString(36);
+}
+async function getCA(key){
+  try{ const c = await caches.open(AC); const r = await c.match('/ac/' + key); if(r) return await r.blob(); } catch{}
+  return null;
+}
+async function setCA(key, blob){
+  try{ const c = await caches.open(AC); await c.put('/ac/' + key, new Response(blob, { headers: {'Content-Type':'audio/mpeg'} })); } catch{}
+}
+async function getCacheStats(){
+  const t = Object.keys(TC).length;
+  let a = 0;
+  try{ const c = await caches.open(AC); a = (await c.keys()).length; } catch{}
+  return { t, a };
+}
+async function clearAllCache(){
+  if(!confirm('确认清除所有翻译和音频缓存？')) return;
+  TC = {}; sv('tc', {});
+  try{ await caches.delete(AC); } catch{}
+  updateCacheStatsUI();
+  alert('缓存已清除');
+}
+async function updateCacheStatsUI(){
+  const el = document.getElementById('cacheStats'); if(!el) return;
+  const { t, a } = await getCacheStats();
+  el.textContent = `已缓存：翻译 ${t} 条 · 音频 ${a} 条`;
+  updateTransUI();
+}
+
+// ═══════════════════════════ AZURE TTS USAGE ═══════════════════════════
+const AZ_LIMIT = 500000;
+const AZ_WARN  = 400000;
+const AZ_CRIT  = 475000;
+
+// ═══════════════════════════ AZURE TRANSLATOR USAGE ═══════════════════════════
+const AZT_LIMIT = 2000000; // 200万字/月
+
+function getAzTUsage(){
+  const now = new Date(), mo = `${now.getFullYear()}-${now.getMonth()+1}`;
+  const s = ld('azTUsage', {mo:'', chars:0});
+  return s.mo !== mo ? {mo, chars:0} : s;
+}
+function addAzTUsage(n){
+  const u = getAzTUsage(); u.chars += n; sv('azTUsage', u);
+  updateTransUI();
+  const pct = u.chars / AZT_LIMIT * 100;
+  if(pct >= S.transSwitchPct){
+    // Will auto-fall to MyMemory on next call
+    updateTransUI();
+  }
+}
+function getActiveTransEngine(){
+  if(!S.azTransKey) return 'mymemory';
+  const pct = getAzTUsage().chars / AZT_LIMIT * 100;
+  return pct >= S.transSwitchPct ? 'mymemory' : 'azure';
+}
+function updateTransUI(){
+  const eng = getActiveTransEngine();
+  const u = getAzTUsage();
+  const pct = Math.min(u.chars / AZT_LIMIT * 100, 100);
+  const hasKey = !!S.azTransKey;
+
+  // Active badge (header)
+  const ab = document.getElementById('transActiveBadge'); if(!ab) return;
+  if(eng === 'azure'){ ab.textContent = '▶ Azure 翻译'; ab.className = 'trans-active-badge on-az'; }
+  else{ ab.textContent = '▶ MyMemory'; ab.className = 'trans-active-badge on-mm'; }
+
+  // Azure engine card
+  const tengAz = document.getElementById('tengAz');
+  const azBadge = document.getElementById('azTransBadge');
+  if(!hasKey){
+    tengAz.className = 'teng t-off';
+    azBadge.textContent = '未配置'; azBadge.style.cssText = '';
+    document.getElementById('azTransBarWrap').style.display = 'none';
+    document.getElementById('azTransNums').textContent = '';
+    document.getElementById('azTransEst').textContent = '';
+    document.getElementById('azTransAlert').className = 'usage-alert';
+  } else if(eng === 'mymemory'){
+    tengAz.className = 'teng t-warn';
+    azBadge.textContent = '已切换'; azBadge.style.cssText = 'background:#FEF3C7;color:#92400E';
+  } else {
+    tengAz.className = 'teng t-active';
+    azBadge.textContent = '使用中'; azBadge.style.cssText = 'background:#D1FAE5;color:#065F46';
+  }
+  if(hasKey){
+    document.getElementById('azTransBarWrap').style.display = 'block';
+    const fill = document.getElementById('azTransFill');
+    fill.style.width = pct + '%';
+    fill.className = 'usage-fill' + (pct >= 90 ? ' crit' : pct >= 70 ? ' warn' : '');
+    document.getElementById('azTransNums').textContent =
+      `${u.chars.toLocaleString()} / 2,000,000 字 (${pct.toFixed(1)}%)`;
+    // Estimate plays remaining
+    const tl = S.sentences.join(' ').length || 0;
+    document.getElementById('azTransEst').textContent =
+      tl ? `约剩 ${Math.floor((AZT_LIMIT - u.chars) / Math.max(tl,1))} 次` : '';
+    const al = document.getElementById('azTransAlert');
+    if(pct >= S.transSwitchPct){ al.className='usage-alert crit'; al.textContent=`⚠️ 已超 ${S.transSwitchPct}%，已切到 MyMemory`; }
+    else if(pct >= 70){ al.className='usage-alert warn'; al.textContent=`用量已超 70%`; }
+    else{ al.className='usage-alert'; }
+  }
+
+  // MyMemory card
+  const tengMM = document.getElementById('tengMM');
+  const mmBadge = document.getElementById('mmBadge');
+  if(eng === 'mymemory'){
+    tengMM.className = 'teng t-active';
+    mmBadge.textContent = '使用中'; mmBadge.style.cssText = 'background:#D1FAE5;color:#065F46';
+  } else {
+    tengMM.className = 'teng';
+    mmBadge.textContent = '备用'; mmBadge.style.cssText = '';
+  }
+}
+
+function getUsage(){
+  const now = new Date();
+  const mo = `${now.getFullYear()}-${now.getMonth()+1}`;
+  const stored = ld('azUsage',{mo:'',chars:0});
+  if(stored.mo !== mo) return {mo, chars:0};
+  return stored;
+}
+function addUsage(n){
+  const u = getUsage(); u.chars += n; sv('azUsage',u);
+  updateUsageUI();
+  // Auto-switch at 95%
+  if(u.chars >= AZ_CRIT && S.engine === 'azure'){
+    setEngine('browser');
+    alert(`Azure 用量已达 ${(u.chars/1000).toFixed(0)}k / 500k 字（95%），已自动切换到浏览器语音。`);
+  }
+}
+function updateUsageUI(){
+  const u = getUsage();
+  const pct = Math.min(u.chars / AZ_LIMIT * 100, 100);
+  const fill = document.getElementById('uFill');
+  if(!fill) return;
+  fill.style.width = pct + '%';
+  fill.className = 'usage-fill' + (u.chars >= AZ_CRIT ? ' crit' : u.chars >= AZ_WARN ? ' warn' : '');
+  document.getElementById('uNums').textContent =
+    `${u.chars.toLocaleString()} / ${AZ_LIMIT.toLocaleString()} 字（${pct.toFixed(1)}%）`;
+  // Estimate plays remaining
+  const textLen = S.sentences.join(' ').length || 0;
+  if(textLen > 0){
+    const rem = Math.max(0, AZ_LIMIT - u.chars);
+    const plays = Math.floor(rem / textLen);
+    document.getElementById('uEst').textContent =
+      `当前文本约 ${textLen.toLocaleString()} 字/次，剩余可播放约 ${plays.toLocaleString()} 次`;
+  } else {
+    document.getElementById('uEst').textContent = '加载文本后显示可播放次数';
+  }
+  const alertEl = document.getElementById('uAlert');
+  if(u.chars >= AZ_CRIT){
+    alertEl.className = 'usage-alert crit';
+    alertEl.textContent = '⚠️ 用量已超 95%，即将自动切换到浏览器语音';
+  } else if(u.chars >= AZ_WARN){
+    alertEl.className = 'usage-alert warn';
+    alertEl.textContent = '用量已超 80%，请注意额度';
+  } else {
+    alertEl.className = 'usage-alert';
+  }
+}
+
+// ═══════════════════════════ STATE ═══════════════════════════
+const S = {
+  sentences:[], isPlaying:false, curIdx:0, roundsDone:0,
+  speed:1.0, mode:'once', playCount:3, shadowPause:3,
+  timeLimit:0, startTime:null, timerIv:null, pending:[],
+  dispMode:'en', translations:[], translating:false,
+  vocab: ld('elVocab',[]),
+  snippets: ld('elSnips',[]),
+  curWordInfo:null, voices:[], voice:null, activeSnipId:null,
+  vocFilter:'all', vocSearch:'', vocTagFilter:[],
+  fcList:[], fcIdx:0, fcFlipped:false,
+  // engine
+  engine: ld('azEngine','browser'),
+  azCfg: ld('azCfg',{key:'',region:'eastasia',voice:'en-GB-SoniaNeural'}),
+  // translation
+  azTransKey: ld('azTransKey',''),
+  transSwitchPct: ld('transSwitchPct', 90),
+};
+S.vocab.forEach(v=>{ if(v.mastery===undefined) v.mastery=0; if(!v.tags) v.tags=[]; });
+
+// current azure audio element
+let _azAudio = null;
+
+// ═══════════════════════════ PWA ═══════════════════════════
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; document.getElementById('installBtn').style.display='inline-block'; });
+function installPWA(){ if(!deferredInstall) return; deferredInstall.prompt(); deferredInstall.userChoice.then(()=>{ deferredInstall=null; document.getElementById('installBtn').style.display='none'; }); }
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+// ═══════════════════════════ ENGINE ═══════════════════════════
+function setEngine(e){
+  S.engine = e;
+  sv('azEngine', e);
+  // Update radio
+  document.querySelectorAll('input[name=eng]').forEach(r=>r.checked=(r.value===e));
+  // Update UI panels
+  document.getElementById('optBrowser').classList.toggle('sel', e==='browser');
+  document.getElementById('optAzure').classList.toggle('sel', e==='azure');
+  document.getElementById('browserVoiceBox').style.display = e==='browser'?'block':'none';
+  document.getElementById('azureBox').style.display = e==='azure'?'block':'none';
+  // Header tag
+  const tag = document.getElementById('engTag');
+  tag.textContent = e==='azure' ? 'Azure 语音' : '浏览器语音';
+  tag.className = 'eng-tag ' + e;
+  if(e==='azure') updateUsageUI();
+}
+
+function saveAzCfg(){
+  S.azCfg.key    = document.getElementById('azKey').value.trim();
+  S.azCfg.region = document.getElementById('azRegion').value;
+  S.azCfg.voice  = document.getElementById('azVoice').value;
+  sv('azCfg', S.azCfg);
+}
+
+function initEngineUI(){
+  document.getElementById('azKey').value        = S.azCfg.key||'';
+  document.getElementById('azRegion').value     = S.azCfg.region||'eastasia';
+  document.getElementById('azVoice').value      = S.azCfg.voice||'en-GB-SoniaNeural';
+  document.getElementById('azTransKey').value   = S.azTransKey||'';
+  document.getElementById('transSwitchPct').value = S.transSwitchPct||90;
+  setEngine(S.engine);
+  updateTransUI();
+}
+
+function saveTransCfg(){
+  S.azTransKey    = document.getElementById('azTransKey').value.trim();
+  S.transSwitchPct = parseInt(document.getElementById('transSwitchPct').value) || 90;
+  sv('azTransKey',     S.azTransKey);
+  sv('transSwitchPct', S.transSwitchPct);
+  updateTransUI();
+}
+function copyTTSKey(){
+  if(!S.azCfg.key){ alert('请先在语音引擎中填写 Azure Key'); return; }
+  document.getElementById('azTransKey').value = S.azCfg.key;
+  S.azTransKey = S.azCfg.key;
+  sv('azTransKey', S.azTransKey);
+  updateTransUI();
+}
+
+// ═══════════════════════════ AZURE TTS ═══════════════════════════
+async function azureSpeak(text){
+  // 1. Check audio cache first — no API call, no quota used
+  const ck = audioKey(text);
+  const cached = await getCA(ck);
+  if(cached){ updateCacheStatsUI(); return cached; }
+
+  // 2. Fetch from Azure
+  const {key: apiKey, region, voice} = S.azCfg;
+  if(!apiKey) throw new Error('no key');
+  const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Speed NOT in SSML — controlled via audio.playbackRate so cache stays valid across speed changes
+  const ssml = `<speak version='1.0' xml:lang='en-GB'><voice name='${voice}'>${escaped}</voice></speak>`;
+  const res = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+    method: 'POST',
+    headers: {
+      'Ocp-Apim-Subscription-Key': apiKey,
+      'Content-Type': 'application/ssml+xml',
+      'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
+    },
+    body: ssml,
+  });
+  if(!res.ok) throw new Error(`Azure ${res.status}`);
+  addUsage(ssml.length);
+  const blob = await res.blob();
+
+  // 3. Save to cache for next time
+  await setCA(ck, blob);
+  updateCacheStatsUI();
+  return blob;
+}
+
+function stopAzAudio(){
+  if(_azAudio){ _azAudio.pause(); if(_azAudio._url) URL.revokeObjectURL(_azAudio._url); _azAudio=null; }
+}
+
+function pauseAzAudio(){
+  if(_azAudio) _azAudio.pause();
+}
+
+function resumeAzAudio(){
+  if(_azAudio && _azAudio.paused) _azAudio.play();
+}
+
+// ═══════════════════════════ BROWSER VOICES ═══════════════════════════
+function initVoices(){
+  const fill=()=>{
+    S.voices=speechSynthesis.getVoices();
+    const sel=document.getElementById('voiceSel'); sel.innerHTML='';
+    const en=S.voices.filter(v=>v.lang.startsWith('en'));
+    const gb=en.filter(v=>v.lang==='en-GB'),us=en.filter(v=>v.lang==='en-US'),oth=en.filter(v=>!['en-GB','en-US'].includes(v.lang));
+    const ag=(lbl,arr)=>{ if(!arr.length) return; const g=document.createElement('optgroup'); g.label=lbl; arr.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=`${v.name} (${v.lang})`; g.appendChild(o); }); sel.appendChild(g); };
+    ag('英式英语 (en-GB)',gb); ag('美式英语 (en-US)',us); ag('其他英语',oth);
+    if(!en.length){ sel.innerHTML='<option>暂无语音</option>'; return; }
+    const first=gb[0]||us[0]||en[0]; sel.value=first.name; S.voice=first;
+    sel.onchange=()=>{ S.voice=S.voices.find(v=>v.name===sel.value)||null; };
+  };
+  fill(); speechSynthesis.onvoiceschanged=fill;
+}
+
+// ═══════════════════════════ TEXT ═══════════════════════════
+function loadText(){
+  const txt=document.getElementById('ti').value.trim(); if(!txt) return;
+  S.sentences=parseSents(txt); S.curIdx=0; S.roundsDone=0;
+  S.translations=new Array(S.sentences.length).fill(null);
+  S.dispMode='en'; updMBtn('en'); renderText();
+  document.getElementById('inputMode').style.display='none';
+  document.getElementById('displayMode').style.display='block';
+  setOn(true); updProg();
+  if(S.engine==='azure') updateUsageUI();
+}
+function parseSents(t){ return (t.match(/[^.!?…]+[.!?…]+["'""]?\s*|[^.!?…]+$/g)||[t]).map(s=>s.trim()).filter(s=>s.length>2); }
+function renderText(){
+  const d=document.getElementById('textDisplay'); d.innerHTML=''; let wc=0;
+  S.sentences.forEach((sent,si)=>{
+    const blk=document.createElement('div'); blk.className='sent-block'; blk.dataset.idx=si;
+    const en=document.createElement('div'); en.className='sent-en'; en.dataset.idx=si;
+    tokenize(sent).forEach(tok=>{
+      if(tok.type==='word'){
+        const sp=document.createElement('span'); sp.className='word';
+        const cl=tok.text.toLowerCase().replace(/^[^a-z]+|[^a-z]+$/g,'');
+        sp.dataset.w=cl; sp.dataset.raw=tok.text; sp.textContent=tok.text;
+        sp.onclick=e=>{e.stopPropagation();openPop(sp);};
+        if(cl&&S.vocab.some(v=>v.word===cl)) sp.classList.add('sv');
+        en.appendChild(sp); if(cl) wc++;
+      } else en.appendChild(document.createTextNode(tok.text));
+    });
+    blk.appendChild(en);
+    const cn=document.createElement('div'); cn.className='sent-cn hid'; cn.dataset.idx=si;
+    cn.textContent=S.translations[si]||'翻译加载中…';
+    if(!S.translations[si]) cn.classList.add('ld');
+    blk.appendChild(cn); d.appendChild(blk);
+  });
+  document.getElementById('metaI').textContent=`${S.sentences.length} 句 · ${wc} 词`;
+}
+function tokenize(t){ const r=[],re=/([a-zA-Z''\-]+)|([^a-zA-Z''\-]+)/g; let m; while((m=re.exec(t))){ if(m[1]) r.push({type:'word',text:m[1]}); else r.push({type:'o',text:m[2]}); } return r; }
+function clearInput(){ document.getElementById('ti').value=''; }
+function backToInput(){ stopPlay(); document.getElementById('inputMode').style.display='block'; document.getElementById('displayMode').style.display='none'; setOn(false); }
+function setOn(on){ ['playBtn','stopBtn','prevBtn','nextBtn'].forEach(id=>document.getElementById(id).disabled=!on); }
+
+function setDM(m){
+  S.dispMode=m; updMBtn(m);
+  const cns=document.querySelectorAll('.sent-cn'),ens=document.querySelectorAll('.sent-en');
+  if(m==='en'){ ens.forEach(e=>e.style.display=''); cns.forEach(e=>e.classList.add('hid')); }
+  else if(m==='cn'){ ens.forEach(e=>e.style.display='none'); cns.forEach(e=>e.classList.remove('hid')); }
+  else{ ens.forEach(e=>e.style.display=''); cns.forEach(e=>e.classList.remove('hid')); }
+  if(m!=='en'&&!S.translating) fetchAllCN();
+}
+function updMBtn(m){ document.querySelectorAll('.mb-btn').forEach(b=>b.classList.toggle('on',b.dataset.m===m)); }
+// ── Azure Translator ──
+async function azureTranslate(texts){
+  const key = S.azTransKey;
+  if(!key) throw new Error('no azure trans key');
+  const region = S.azCfg.region || 'eastasia';
+  const res = await fetch(
+    'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=en&to=zh-Hans',
+    {
+      method: 'POST',
+      headers: {
+        'Ocp-Apim-Subscription-Key': key,
+        'Ocp-Apim-Subscription-Region': region,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(texts.map(t => ({ Text: t }))),
+    }
+  );
+  if(!res.ok) throw new Error(`Azure Translate ${res.status}`);
+  const data = await res.json();
+  const totalChars = texts.reduce((sum, t) => sum + t.length, 0);
+  addAzTUsage(totalChars);
+  return data.map(item => item.translations[0].text);
+}
+
+// ── MyMemory (batch wrapper, one by one) ──
+async function mymemoryTranslateBatch(texts){
+  const results = [];
+  for(const t of texts){
+    try{
+      const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t.slice(0,500))}&langpair=en|zh`);
+      const d = await r.json();
+      results.push(d.responseData?.translatedText || '');
+    } catch{ results.push(''); }
+    await new Promise(r => setTimeout(r, 110));
+  }
+  return results;
+}
+
+// ── Smart dispatch: Azure → MyMemory ──
+async function smartTranslate(texts){
+  const eng = getActiveTransEngine();
+  if(eng === 'azure'){
+    try{
+      return await azureTranslate(texts);
+    } catch(e){
+      console.warn('Azure Translate failed, falling back to MyMemory:', e);
+      updateTransUI(); // refresh display
+      return await mymemoryTranslateBatch(texts);
+    }
+  }
+  return await mymemoryTranslateBatch(texts);
+}
+
+async function fetchAllCN(){
+  if(S.translating) return; S.translating=true;
+
+  // First: fill from translation cache (no API call)
+  S.sentences.forEach((s, i) => {
+    if(S.translations[i]) return;
+    const cached = getCT(s);
+    if(cached){
+      S.translations[i] = cached;
+      const el = document.querySelector(`.sent-cn[data-idx="${i}"]`);
+      if(el){ el.textContent = cached; el.classList.remove('ld'); }
+    }
+  });
+
+  // Then: fetch only what's still missing
+  const needs = S.sentences.map((s,i)=>({i,s})).filter(({i})=>!S.translations[i]);
+  if(!needs.length){ S.translating=false; return; }
+
+  // Batch translate remaining sentences via smart engine (up to 50 per request)
+  for(let c = 0; c < needs.length; c += 50){
+    const batch = needs.slice(c, c + 50);
+    try{
+      const results = await smartTranslate(batch.map(x => x.s));
+      batch.forEach(({i, s}, ri) => {
+        const cn = results[ri] || '';
+        S.translations[i] = cn;
+        setCT(s, cn);
+        const el = document.querySelector(`.sent-cn[data-idx="${i}"]`);
+        if(el){ el.textContent = cn || '（无翻译）'; el.classList.remove('ld'); }
+      });
+    } catch(e){
+      console.warn('smartTranslate failed:', e);
+    }
+  }
+  S.translating=false;
+}
+
+async function fetchCN_mymemory(i, text){
+  // kept as a direct MyMemory fallback for individual sentences
+  try{
+    const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.slice(0,500))}&langpair=en|zh`);
+    const data=await r.json(); const cn=data.responseData?.translatedText||'';
+    S.translations[i]=cn; setCT(text, cn);
+    const el=document.querySelector(`.sent-cn[data-idx="${i}"]`);
+    if(el){el.textContent=cn||'（无翻译）';el.classList.remove('ld');}
+  }catch{}
+}
+
+// ═══════════════════════════ PLAYBACK ═══════════════════════════
+function togglePlay(){ if(S.isPlaying) pausePlay(); else startPlay(); }
+
+function setPlayIcon(icon){
+  const btn = document.getElementById('playBtn');
+  btn.textContent = icon;
+  // ▶ glyph is optically left-biased, compensate with padding-left
+  btn.classList.toggle('paused', icon === '⏸');
+}
+
+function startPlay(){
+  if(!S.sentences.length) return;
+  S.isPlaying=true;
+  if(S.mode==='timed'){ const m=parseInt(document.getElementById('timeSel').value); S.timeLimit=m*60000; S.startTime=Date.now(); startTimer(m*60); }
+  setPlayIcon('⏸'); setSt('play','播放中'); showBadge(); playCur();
+}
+
+function pausePlay(){
+  if(S.engine==='azure'){ pauseAzAudio(); }
+  else{ speechSynthesis.pause(); }
+  clrPnd(); S.isPlaying=false;
+  setPlayIcon('▶'); setSt('pause','已暂停'); stopTimer();
+}
+
+function stopPlay(){
+  if(S.engine==='azure'){ stopAzAudio(); }
+  else{ speechSynthesis.cancel(); }
+  clrPnd(); S.isPlaying=false; S.curIdx=0; S.roundsDone=0; stopTimer();
+  setPlayIcon('▶');
+  document.getElementById('mBadge').style.display='none';
+  setSt('','就绪'); clrHL(); updProg();
+}
+
+function clrPnd(){ S.pending.forEach(clearTimeout); S.pending=[]; }
+
+async function playCur(){
+  if(!S.isPlaying) return;
+  if(S.mode==='timed'&&Date.now()-S.startTime>=S.timeLimit){ stopPlay(); setSt('','已完成（时间到）'); return; }
+  if(S.curIdx>=S.sentences.length){
+    S.roundsDone++;
+    if(S.mode==='loop'||S.mode==='timed'){ S.curIdx=0; playCur(); return; }
+    if(S.mode==='ntimes'&&S.roundsDone<S.playCount){ S.curIdx=0; playCur(); return; }
+    stopPlay(); setSt('','播放完成 ✓'); return;
+  }
+  hlSent(S.curIdx); updProg();
+  const text = S.sentences[S.curIdx];
+
+  if(S.engine==='azure' && S.azCfg.key){
+    // Azure TTS path
+    try{
+      const blob = await azureSpeak(text);
+      if(!S.isPlaying) return; // cancelled while fetching
+      const url = URL.createObjectURL(blob);
+      stopAzAudio();
+      _azAudio = new Audio(url);
+      _azAudio._url = url;
+      _azAudio.playbackRate = S.speed;
+      _azAudio.onended = ()=>{
+        URL.revokeObjectURL(url); _azAudio=null;
+        if(!S.isPlaying) return;
+        afterSentence();
+      };
+      _azAudio.onerror = ()=>{ _azAudio=null; if(!S.isPlaying) return; S.curIdx++; playCur(); };
+      _azAudio.play();
+    } catch(err){
+      console.warn('Azure TTS error, falling back:', err);
+      // Fallback to browser for this sentence
+      browserSpeak(text, afterSentence);
+    }
+  } else {
+    // Browser TTS path
+    browserSpeak(text, afterSentence);
+  }
+}
+
+function afterSentence(){
+  if(!S.isPlaying) return;
+  if(S.mode==='shadow'){
+    const t=setTimeout(()=>{ S.curIdx++; playCur(); }, S.shadowPause*1000);
+    S.pending.push(t);
+  } else {
+    S.curIdx++; playCur();
+  }
+}
+
+function browserSpeak(text, onEnd){
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=S.speed; if(S.voice) u.voice=S.voice;
+  u.onboundary=e=>{ if(e.name==='word') hlWordAt(S.curIdx,e.charIndex,e.charLength||0); };
+  u.onend=onEnd;
+  u.onerror=e=>{ if(e.error==='interrupted'||e.error==='canceled') return; S.curIdx++; playCur(); };
+  speechSynthesis.speak(u);
+}
+
+function prevSent(){
+  if(S.engine==='azure') stopAzAudio(); else speechSynthesis.cancel();
+  clrPnd(); S.curIdx=Math.max(0,S.curIdx-1); hlSent(S.curIdx); updProg();
+  if(S.isPlaying) playCur();
+}
+function nextSent(){
+  if(S.engine==='azure') stopAzAudio(); else speechSynthesis.cancel();
+  clrPnd(); S.curIdx=Math.min(S.sentences.length-1,S.curIdx+1); hlSent(S.curIdx); updProg();
+  if(S.isPlaying) playCur();
+}
+
+function hlSent(i){ clrHL(); const e=document.querySelector(`.sent-en[data-idx="${i}"]`); if(e){e.classList.add('hl');e.scrollIntoView({behavior:'smooth',block:'nearest'});} }
+function hlWordAt(si,ci,cl){ document.querySelectorAll('.word.hl').forEach(e=>e.classList.remove('hl')); const se=document.querySelector(`.sent-en[data-idx="${si}"]`); if(!se) return; const tg=S.sentences[si].substring(ci,ci+cl).trim(); if(!tg) return; for(const w of se.querySelectorAll('.word')){ if(w.dataset.raw===tg||w.textContent.trim()===tg){w.classList.add('hl');break;} } }
+function clrHL(){ document.querySelectorAll('.sent-en.hl,.word.hl').forEach(e=>e.classList.remove('hl')); }
+function updProg(){ const tot=S.sentences.length,cur=Math.min(S.curIdx+1,tot),pct=tot?(S.curIdx/tot)*100:0; document.getElementById('pFil').style.width=pct+'%'; document.getElementById('pTxt').textContent=tot?`第 ${cur} / ${tot} 句`:'— / — 句'; }
+function setSt(type,txt){ const d=document.getElementById('dot'); d.className='dot'+(type?' '+type:''); document.getElementById('stxt').textContent=txt; }
+function showBadge(){ const lb={once:'一次性',shadow:`影子跟读(${S.shadowPause}s)`,loop:'循环播放',ntimes:`播放${S.playCount}次`,timed:(()=>{ const s=document.getElementById('timeSel'); return '计时'+s.options[s.selectedIndex].text; })()}; const b=document.getElementById('mBadge'); b.textContent=lb[S.mode]||''; b.style.display='inline'; }
+
+function startTimer(s){ const el=document.getElementById('timerEl'); el.style.display='inline'; let r=s; const f=x=>`⏱ ${String(Math.floor(x/60)).padStart(2,'0')}:${String(x%60).padStart(2,'0')}`; el.textContent=f(r); S.timerIv=setInterval(()=>{el.textContent=f(Math.max(0,--r));if(r<=0)stopTimer();},1000); }
+function stopTimer(){ clearInterval(S.timerIv); document.getElementById('timerEl').style.display='none'; }
+function onSpeed(v){ S.speed=parseFloat(v); document.getElementById('spV').textContent=parseFloat(v).toFixed(1)+'x'; if(_azAudio) _azAudio.playbackRate=S.speed; }
+function onMode(v){ S.mode=v; document.getElementById('gN').style.display=v==='ntimes'?'block':'none'; document.getElementById('gT').style.display=v==='timed'?'block':'none'; document.getElementById('gS').style.display=v==='shadow'?'block':'none'; }
+
+// ═══════════════════════════ WORD POPUP ═══════════════════════════
+async function openPop(el){
+  const word=el.dataset.w; if(!word||word.length<2) return;
+  S.curWordInfo={word,el,defs:null,phonetic:'',cn:''};
+  document.getElementById('pWord').textContent=word; document.getElementById('pPh').textContent='';
+  document.getElementById('pDefs').innerHTML='<span class="pop-ld">加载中…</span>';
+  document.getElementById('pCN').innerHTML='<span class="pop-ld">加载中…</span>';
+  const inV=S.vocab.some(v=>v.word===word);
+  const btn=document.getElementById('addVBtn'); btn.textContent=inV?'✓ 已在生词本':'+ 加入生词本'; btn.disabled=inV; btn.className='btn '+(inV?'btn-s':'btn-g');
+  posPop(el); document.getElementById('ov').style.display='block'; document.getElementById('pop').style.display='block';
+  fetchDef(word); fetchCN_word(word);
+}
+function posPop(el){ const pop=document.getElementById('pop'),r=el.getBoundingClientRect(); let top=r.bottom+10,left=r.left; if(top+360>window.innerHeight) top=r.top-370; if(left+360>window.innerWidth) left=window.innerWidth-365; pop.style.top=Math.max(8,top)+'px'; pop.style.left=Math.max(8,left)+'px'; }
+async function fetchDef(word){
+  try{ const r=await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`); if(!r.ok) throw 0; const data=await r.json(); const entry=data[0]; const ph=entry.phonetics?.find(p=>p.text)?.text||''; document.getElementById('pPh').textContent=ph; const defs=[],c=document.getElementById('pDefs'); c.innerHTML=''; entry.meanings?.slice(0,3).forEach(m=>{ m.definitions?.slice(0,2).forEach(d=>{ const div=document.createElement('div'); div.className='def-it'; div.innerHTML=`<span class="pos">${m.partOfSpeech}</span>${d.definition}`; if(d.example){const ex=document.createElement('div');ex.className='def-ex';ex.textContent=`"${d.example}"`;div.appendChild(ex);} c.appendChild(div); defs.push({pos:m.partOfSpeech,def:d.definition}); }); }); if(!c.children.length) c.innerHTML='<span class="pop-ld">未找到释义</span>'; if(S.curWordInfo?.word===word){S.curWordInfo.defs=defs;S.curWordInfo.phonetic=ph;} }catch{ document.getElementById('pDefs').innerHTML='<span class="pop-ld">未找到英文释义</span>'; }
+}
+// Google Translate unofficial API — best quality for single words, free, no key needed
+async function googleTranslateWord(text){
+  try{
+    const url=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=${encodeURIComponent(text)}`;
+    const r=await fetch(url);
+    const d=await r.json();
+    return d[0]?.map(x=>x[0]).filter(Boolean).join('')||'';
+  }catch{ return ''; }
+}
+
+async function fetchCN_word(word){
+  try{
+    // 1. Cache hit
+    const hit=getCT(word);
+    if(hit){ document.getElementById('pCN').textContent=hit; if(S.curWordInfo?.word===word) S.curWordInfo.cn=hit; return; }
+    let cn='';
+    // 2. Azure if configured and quota OK
+    if(S.azTransKey && getActiveTransEngine()==='azure'){
+      try{ const r=await azureTranslate([word]); cn=r[0]||''; }catch{}
+    }
+    // 3. Google Translate (free, much better than MyMemory for single words)
+    if(!cn) cn=await googleTranslateWord(word);
+    // 4. MyMemory as last resort
+    if(!cn){ const r=await mymemoryTranslateBatch([word]); cn=r[0]||''; }
+    if(cn) setCT(word,cn);
+    document.getElementById('pCN').textContent=cn||'未找到翻译';
+    if(S.curWordInfo?.word===word) S.curWordInfo.cn=cn;
+  }catch{ document.getElementById('pCN').textContent='翻译加载失败'; }
+}
+function closePop(){ document.getElementById('ov').style.display='none'; document.getElementById('pop').style.display='none'; }
+function speakCur(){
+  if(!S.curWordInfo) return;
+  if(S.engine==='azure'&&S.azCfg.key){
+    azureSpeak(S.curWordInfo.word).then(blob=>{ const url=URL.createObjectURL(blob); const a=new Audio(url); a.onended=()=>URL.revokeObjectURL(url); a.play(); }).catch(()=>speakBrowserWord(S.curWordInfo.word));
+  } else speakBrowserWord(S.curWordInfo.word);
+}
+function speakBrowserWord(word){ const u=new SpeechSynthesisUtterance(word); u.rate=0.75; if(S.voice) u.voice=S.voice; speechSynthesis.speak(u); }
+function addCurWord(){ if(!S.curWordInfo) return; const{word,defs,cn,phonetic}=S.curWordInfo; addToVocab(word,defs,cn,phonetic); const btn=document.getElementById('addVBtn'); btn.textContent='✓ 已在生词本'; btn.disabled=true; btn.className='btn btn-s'; }
+
+// ═══════════════════════════ VOCAB ═══════════════════════════
+const MLAB=['学习中','熟悉','已掌握'];
+
+// ── Tag colour palette (hashed by tag name) ──
+const TAG_PALETTE=[
+  {bg:'#EDE9FE',tx:'#5B21B6'},{bg:'#DBEAFE',tx:'#1E40AF'},{bg:'#D1FAE5',tx:'#065F46'},
+  {bg:'#FEF3C7',tx:'#92400E'},{bg:'#FCE7F3',tx:'#9D174D'},{bg:'#FEE2E2',tx:'#991B1B'},
+  {bg:'#ECFDF5',tx:'#064E3B'},{bg:'#F0F9FF',tx:'#0369A1'},{bg:'#FFF7ED',tx:'#9A3412'},
+  {bg:'#F5F3FF',tx:'#4C1D95'},
+];
+function tagColor(tag){
+  let h=5381; for(let i=0;i<tag.length;i++) h=(Math.imul(h,31)+tag.charCodeAt(i))|0;
+  return TAG_PALETTE[Math.abs(h)%TAG_PALETTE.length];
+}
+function getAllTags(){ const s=new Set(); S.vocab.forEach(v=>(v.tags||[]).forEach(t=>s.add(t))); return [...s].sort(); }
+
+// ── Tag CRUD ──
+function addTag(word,tag){
+  tag=tag.trim(); if(!tag) return;
+  const e=S.vocab.find(v=>v.word===word); if(!e) return;
+  if(!e.tags) e.tags=[];
+  if(!e.tags.includes(tag)){ e.tags.push(tag); sv('elVocab',S.vocab); }
+  renderVocab();
+}
+function removeTag(word,tag){
+  const e=S.vocab.find(v=>v.word===word); if(!e||!e.tags) return;
+  e.tags=e.tags.filter(t=>t!==tag); sv('elVocab',S.vocab); renderVocab();
+}
+
+// ── Tag filter ──
+function toggleTagFilter(tag){
+  const i=S.vocTagFilter.indexOf(tag);
+  if(i>=0) S.vocTagFilter.splice(i,1); else S.vocTagFilter.push(tag);
+  renderVocab();
+}
+function clearTagFilter(){ S.vocTagFilter=[]; renderVocab(); }
+
+function renderTagFilterBar(){
+  const tags=getAllTags();
+  const wrap=document.getElementById('tagBarWrap');
+  const bar=document.getElementById('tagBar');
+  if(!tags.length&&!S.vocTagFilter.length){ wrap.style.display='none'; return; }
+  wrap.style.display='';
+  bar.innerHTML='';
+  if(S.vocTagFilter.length){
+    const clr=document.createElement('button');
+    clr.className='tf-clear'; clr.textContent='✕ 清除筛选';
+    clr.onclick=clearTagFilter; bar.appendChild(clr);
+  }
+  tags.forEach(tag=>{
+    const {bg,tx}=tagColor(tag);
+    const chip=document.createElement('span');
+    chip.className='tf-chip'+(S.vocTagFilter.includes(tag)?' sel':'');
+    chip.style.cssText=`background:${bg};color:${tx}`;
+    chip.textContent=tag;
+    chip.onclick=()=>toggleTagFilter(tag);
+    bar.appendChild(chip);
+  });
+}
+
+// ── Inline tag-add input with autocomplete ──
+function startTagAdd(word,btn){
+  const iw=document.createElement('span'); iw.className='tag-iw';
+  const inp=document.createElement('input'); inp.className='tag-input';
+  inp.placeholder='输入标签…'; inp.maxLength=20;
+  const sug=document.createElement('div'); sug.className='tag-sug';
+  iw.appendChild(inp); iw.appendChild(sug);
+  btn.replaceWith(iw); inp.focus();
+
+  function showSug(val){
+    const q=val.toLowerCase();
+    const entry=S.vocab.find(v=>v.word===word);
+    const existing=entry?.tags||[];
+    const filtered=getAllTags().filter(t=>!existing.includes(t)&&(!q||t.toLowerCase().includes(q)));
+    if(!filtered.length){ sug.style.display='none'; return; }
+    sug.innerHTML=''; sug.style.display='block';
+    filtered.slice(0,6).forEach(t=>{
+      const {bg,tx}=tagColor(t);
+      const item=document.createElement('div'); item.className='tag-sug-item';
+      const dot=document.createElement('span');
+      dot.style.cssText=`width:8px;height:8px;border-radius:50%;background:${bg};border:1.5px solid ${tx};flex-shrink:0;display:inline-block`;
+      item.appendChild(dot); item.appendChild(document.createTextNode(' '+t));
+      item.onmousedown=e=>{ e.preventDefault(); commit(t); };
+      sug.appendChild(item);
+    });
+  }
+  function commit(val){
+    val=val.trim(); sug.style.display='none';
+    if(val) addTag(word,val); else renderVocab();
+  }
+  inp.addEventListener('input',()=>showSug(inp.value));
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ commit(inp.value); e.preventDefault(); } else if(e.key==='Escape') renderVocab(); });
+  inp.addEventListener('blur',()=>setTimeout(()=>commit(inp.value),150));
+}
+
+function addToVocab(word,defs,cn,phonetic){ if(S.vocab.some(v=>v.word===word)) return; S.vocab.unshift({word,phonetic:phonetic||'',defs:defs||[],cn:cn||'',date:new Date().toLocaleDateString('zh-CN'),mastery:0,tags:[]}); sv('elVocab',S.vocab); renderVocab(); document.querySelectorAll(`.word[data-w="${word}"]`).forEach(el=>el.classList.add('sv')); }
+function removeVocab(word){ S.vocab=S.vocab.filter(v=>v.word!==word); sv('elVocab',S.vocab); renderVocab(); document.querySelectorAll(`.word[data-w="${word}"]`).forEach(el=>el.classList.remove('sv')); }
+function cycleMastery(word){ const e=S.vocab.find(v=>v.word===word); if(!e) return; e.mastery=(e.mastery+1)%3; sv('elVocab',S.vocab); renderVocab(); }
+function setMastery(word,m){ const e=S.vocab.find(v=>v.word===word); if(!e) return; e.mastery=m; sv('elVocab',S.vocab); renderVocab(); }
+
+function getFiltered(){
+  let list=[...S.vocab];
+  if(S.vocFilter!=='all'){ const mv={m0:0,m1:1,m2:2}; list=list.filter(v=>(v.mastery||0)===mv[S.vocFilter]); }
+  if(S.vocTagFilter&&S.vocTagFilter.length){ list=list.filter(v=>(v.tags||[]).some(t=>S.vocTagFilter.includes(t))); }
+  if(S.vocSearch){ const q=S.vocSearch.toLowerCase(); list=list.filter(v=>v.word.includes(q)||(v.cn||'').includes(q)||(v.tags||[]).some(t=>t.toLowerCase().includes(q))); }
+  const sort=document.getElementById('vocSort')?.value||'date';
+  if(sort==='az') list.sort((a,b)=>a.word.localeCompare(b.word));
+  else if(sort==='mastery') list.sort((a,b)=>(b.mastery||0)-(a.mastery||0));
+  return list;
+}
+
+function renderVocab(){
+  const tot=S.vocab.length,m0=S.vocab.filter(v=>v.mastery===0).length,m1=S.vocab.filter(v=>v.mastery===1).length,m2=S.vocab.filter(v=>v.mastery===2).length;
+  document.getElementById('vocB').textContent=tot?` (${tot})`:'';
+  document.getElementById('statChips').innerHTML=`<span class="sc all${S.vocFilter==='all'?' on':''}" onclick="setVF('all')">全部 ${tot}</span><span class="sc sc0${S.vocFilter==='m0'?' on':''}" onclick="setVF('m0')">学习中 ${m0}</span><span class="sc sc1${S.vocFilter==='m1'?' on':''}" onclick="setVF('m1')">熟悉 ${m1}</span><span class="sc sc2${S.vocFilter==='m2'?' on':''}" onclick="setVF('m2')">已掌握 ${m2}</span>`;
+  document.getElementById('reviewBtn').disabled=tot===0;
+  renderTagFilterBar();
+  const list=getFiltered(),vl=document.getElementById('vocList'),ve=document.getElementById('vocEmp');
+  if(!list.length){ vl.innerHTML=''; ve.style.display='block'; return; }
+  ve.style.display='none'; vl.innerHTML='';
+  list.forEach(e=>{
+    const m=e.mastery||0;
+    const card=document.createElement('div'); card.className='vc';
+    const sd=e.defs?.slice(0,1).map(d=>`[${d.pos}] ${d.def}`).join('')||'';
+    card.innerHTML=`<div class="vc-top"><div class="vc-word">${e.word}</div><button class="mbadge mb${m}" onclick="cycleMastery('${e.word}')">${MLAB[m]}</button><button class="vc-del" onclick="removeVocab('${e.word}')">×</button></div>${e.phonetic?`<div class="vc-ph">${e.phonetic}</div>`:''}${e.cn?`<div class="vc-cn">${e.cn}</div>`:''}${sd?`<div class="vc-def">${sd}</div>`:''}`;
+    // Tags row (DOM-built to handle special chars safely)
+    const tagsDiv=document.createElement('div'); tagsDiv.className='vc-tags';
+    (e.tags||[]).forEach(t=>{
+      const {bg,tx}=tagColor(t);
+      const chip=document.createElement('span'); chip.className='tag-chip';
+      chip.style.cssText=`background:${bg};color:${tx}`;
+      chip.appendChild(document.createTextNode(t));
+      const x=document.createElement('i'); x.className='tag-x'; x.textContent='×';
+      x.onclick=()=>removeTag(e.word,t);
+      chip.appendChild(x); tagsDiv.appendChild(chip);
+    });
+    const addBtn=document.createElement('button'); addBtn.className='tag-add-btn'; addBtn.textContent='+ 标签';
+    addBtn.onclick=()=>startTagAdd(e.word,addBtn);
+    tagsDiv.appendChild(addBtn); card.appendChild(tagsDiv);
+    const dateDiv=document.createElement('div'); dateDiv.className='vc-date'; dateDiv.textContent=e.date;
+    card.appendChild(dateDiv);
+    vl.appendChild(card);
+  });
+}
+function setVF(f){ S.vocFilter=f; renderVocab(); }
+function onVocSearch(v){ S.vocSearch=v; renderVocab(); }
+function exportVocab(){ const rows=S.vocab.map(v=>{const d=v.defs?.slice(0,1).map(x=>`[${x.pos}] ${x.def}`).join('')||'';return [v.word,v.phonetic,v.cn,d,MLAB[v.mastery||0]].join('\t');}); const blob=new Blob(['﻿单词\t音标\t中文\t英文释义\t熟练度\n'+rows.join('\n')],{type:'text/plain;charset=utf-8'}); const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'生词本.tsv'}); a.click(); URL.revokeObjectURL(a.href); }
+
+// ═══════════════════════════ FLASHCARD ═══════════════════════════
+function startReview(){ if(!S.vocab.length) return; S.fcList=[...S.vocab].sort(()=>Math.random()-.5); S.fcIdx=0; S.fcFlipped=false; document.getElementById('fcOv').style.display='flex'; renderFC(); }
+function closeReview(){ document.getElementById('fcOv').style.display='none'; }
+function renderFC(){ const e=S.fcList[S.fcIdx]; if(!e) return; const tot=S.fcList.length,cur=S.fcIdx+1; document.getElementById('fcProg').textContent=`${cur} / ${tot}`; document.getElementById('fcPBF').style.width=(cur/tot*100)+'%'; document.getElementById('fcWord').textContent=e.word; document.getElementById('fcPh').textContent=e.phonetic||''; document.getElementById('fcWord2').textContent=e.word; document.getElementById('fcPh2').textContent=e.phonetic||''; document.getElementById('fcCN').textContent=e.cn||'—'; document.getElementById('fcDef').textContent=e.defs?.slice(0,1).map(d=>`[${d.pos}] ${d.def}`).join('')||''; S.fcFlipped=false; document.getElementById('fcFront').style.display=''; document.getElementById('fcBack').style.display='none'; document.getElementById('fcCard').style.background=''; }
+function flipCard(){ S.fcFlipped=!S.fcFlipped; document.getElementById('fcFront').style.display=S.fcFlipped?'none':''; document.getElementById('fcBack').style.display=S.fcFlipped?'block':'none'; document.getElementById('fcCard').style.background=S.fcFlipped?'#FAFBFF':''; }
+function rateCard(m){ const e=S.fcList[S.fcIdx]; if(!e) return; setMastery(e.word,m); fcNext(); }
+function fcNext(){ if(S.fcIdx<S.fcList.length-1){S.fcIdx++;renderFC();}else{closeReview();alert(`复习完成！共 ${S.fcList.length} 个单词 ✓`);} }
+function fcPrev(){ if(S.fcIdx>0){S.fcIdx--;renderFC();} }
+function fcSkip(){ fcNext(); }
+
+// ═══════════════════════════ LIBRARY ═══════════════════════════
+function toggleSF(){ const f=document.getElementById('saveForm'); f.style.display=f.style.display==='none'?'block':'none'; if(f.style.display==='block') document.getElementById('snipName').focus(); }
+function hideSF(){ document.getElementById('saveForm').style.display='none'; }
+function confirmSave(){ const name=document.getElementById('snipName').value.trim(),text=document.getElementById('ti').value.trim(); if(!name||!text) return; saveSnip(name,text); document.getElementById('snipName').value=''; hideSF(); }
+// Save from display mode
+function toggleDSF(){ const f=document.getElementById('dispSaveForm'); f.style.display=f.style.display==='none'?'block':'none'; if(f.style.display==='block') document.getElementById('dSnipName').focus(); }
+function hideDSF(){ document.getElementById('dispSaveForm').style.display='none'; }
+function confirmDSave(){ const name=document.getElementById('dSnipName').value.trim(); const text=S.sentences.join(' '); if(!name||!text) return; saveSnip(name,text); document.getElementById('dSnipName').value=''; hideDSF(); switchTab('lib'); }
+function saveFromLib(){ const name=document.getElementById('libIn').value.trim(),text=document.getElementById('ti').value.trim()||(S.sentences.length?S.sentences.join(' '):''); if(!name||!text) return; saveSnip(name,text); document.getElementById('libIn').value=''; }
+function saveSnip(name,text){ const id=Date.now(); S.snippets.unshift({id,name,text,date:new Date().toLocaleDateString('zh-CN')}); sv('elSnips',S.snippets); renderLib(); S.activeSnipId=id; }
+function loadSnip(id){ const s=S.snippets.find(x=>x.id===id); if(!s) return; S.activeSnipId=id; stopPlay(); document.getElementById('ti').value=s.text; document.getElementById('inputMode').style.display='block'; document.getElementById('displayMode').style.display='none'; setOn(false); loadText(); renderLib(); }
+function delSnip(id){ S.snippets=S.snippets.filter(x=>x.id!==id); sv('elSnips',S.snippets); if(S.activeSnipId===id) S.activeSnipId=null; renderLib(); }
+function renderLib(){ document.getElementById('libB').textContent=S.snippets.length?` (${S.snippets.length})`:''; const list=document.getElementById('snipList'),emp=document.getElementById('libEmp'); if(!S.snippets.length){list.innerHTML='';emp.style.display='block';return;} emp.style.display='none'; list.innerHTML=''; S.snippets.forEach(s=>{ const el=document.createElement('div'); el.className='snip'+(s.id===S.activeSnipId?' act':''); el.innerHTML=`<div class="snip-n">${s.name}</div><div class="snip-p">${s.text.replace(/\s+/g,' ').slice(0,60)}…</div><div class="snip-d">${s.date}</div><button class="snip-x" onclick="event.stopPropagation();delSnip(${s.id})">×</button>`; el.onclick=()=>loadSnip(s.id); list.appendChild(el); }); }
+
+// ═══════════════════════════ TABS ═══════════════════════════
+function switchTab(t){ const tabs=['set','lib','voc']; document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',tabs[i]===t)); ['tabSet','tabLib','tabVoc'].forEach((id,i)=>document.getElementById(id).style.display=tabs[i]===t?'block':'none'); }
+
+// ═══════════════════════════ KEYBOARD ═══════════════════════════
+document.addEventListener('keydown',e=>{
+  const tag=document.activeElement?.tagName;
+  if(['TEXTAREA','INPUT','SELECT'].includes(tag)) return;
+  if(e.code==='Space'){e.preventDefault();if(!document.getElementById('playBtn').disabled)togglePlay();}
+  else if(e.code==='ArrowLeft'){e.preventDefault();if(!document.getElementById('prevBtn').disabled)prevSent();}
+  else if(e.code==='ArrowRight'){e.preventDefault();if(!document.getElementById('nextBtn').disabled)nextSent();}
+  else if(e.code==='Escape'){if(document.getElementById('fcOv').style.display==='flex')closeReview();else if(document.getElementById('pop').style.display==='block')closePop();else if(S.isPlaying)stopPlay();}
+});
+
+// ═══════════════════════════ INIT ═══════════════════════════
+document.getElementById('nIn').addEventListener('input',e=>{S.playCount=parseInt(e.target.value)||3;});
+document.getElementById('shIn').addEventListener('input',e=>{S.shadowPause=parseInt(e.target.value)||3;});
+initVoices();
+initEngineUI();
+renderVocab();
+renderLib();
+updateCacheStatsUI();
+</script>
+</body>
+</html>
