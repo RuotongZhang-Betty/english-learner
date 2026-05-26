@@ -198,6 +198,23 @@ hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
 .voc-empty{text-align:center;color:var(--mu);padding:32px 0;font-size:13px}
 .voc-empty .ei{font-size:30px;margin-bottom:8px}
 
+/* Shadow reading score panel */
+.sr-panel{margin-top:8px;padding:10px 12px;background:#F8FAFC;border:1px solid var(--bd);border-radius:8px}
+.sr-mic-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sr-mic-dot{width:10px;height:10px;border-radius:50%;background:#CBD5E1;flex-shrink:0;transition:background .3s}
+.sr-mic-dot.rec{background:var(--err);animation:pulse .8s ease infinite}
+.sr-mic-dot.done{background:var(--g)}
+.sr-status{font-size:12px;color:var(--mu)}
+.sr-score-badge{font-size:22px;font-weight:800;margin-bottom:6px}
+.sr-score-badge.sg{color:var(--g)}.sr-score-badge.sw{color:var(--warn)}.sr-score-badge.se{color:var(--err)}
+.sr-words{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px}
+.sr-w{padding:2px 6px;border-radius:4px;font-size:13px;font-weight:500}
+.sr-w.ok{background:#D1FAE5;color:#065F46}.sr-w.miss{background:#FEE2E2;color:#991B1B;text-decoration:line-through}
+.sr-recog{font-size:11px;color:var(--mu);font-style:italic;margin-bottom:8px}
+.sr-acts{display:flex;gap:6px}
+.sr-toggle{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--mu);cursor:pointer}
+.sr-toggle input{accent-color:var(--p);width:auto;padding:0;border:none;cursor:pointer}
+
 /* Controls bar */
 .cbar{grid-column:1/-1;background:var(--sur);border-top:1px solid var(--bd);padding:14px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap;box-shadow:0 -1px 6px rgba(0,0,0,.06);flex-shrink:0}
 .pbtn{width:50px;height:50px;border-radius:50%;background:var(--p);color:#fff;border:none;cursor:pointer;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;padding-left:3px}
@@ -237,6 +254,33 @@ hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
 .pop-cn{font-size:16px;color:var(--pu);font-weight:600}
 .pop-ld{color:var(--mu);font-size:13px}
 .pop-acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)}
+
+/* Toast notifications */
+#toastBox{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
+.toast-msg{padding:9px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.15);opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;max-width:320px;text-align:center;white-space:pre-line}
+.toast-msg.in{opacity:1;transform:translateY(0)}
+.toast-msg.t-info{background:#1E293B;color:#fff}
+.toast-msg.t-ok{background:#059669;color:#fff}
+.toast-msg.t-warn{background:#F59E0B;color:#fff}
+.toast-msg.t-err{background:#EF4444;color:#fff}
+
+/* Hover translate tooltip */
+.hover-tip{position:fixed;background:#1E293B;color:#F8FAFC;font-size:12px;padding:5px 10px;border-radius:7px;z-index:150;pointer-events:none;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.hover-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1E293B}
+
+/* Word difficulty marker */
+.word.adv{text-decoration:underline dotted #F59E0B;text-underline-offset:3px}
+
+/* SRS due chip */
+.srs-due-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;background:#FEF3C7;color:#92400E;cursor:pointer;border:2px solid transparent;transition:all .15s;white-space:nowrap}
+.srs-due-chip:hover{border-color:#F59E0B}
+.srs-due-chip.zero{background:#F1F5F9;color:var(--mu);cursor:default}
+
+/* Study log */
+.study-log{margin-top:16px;padding:12px;background:#F8FAFC;border:1px solid var(--bd);border-radius:10px}
+.study-log-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:7px}
+.study-log-today{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px}
+.study-log-streak{font-size:12px;color:var(--p);font-weight:600}
 
 /* Flashcard */
 .fc-ov{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
@@ -371,6 +415,10 @@ hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
         <div class="sg" id="gS" style="display:none">
           <label class="sl">跟读间隔（秒）</label>
           <input type="number" id="shIn" value="3" min="1" max="15">
+          <label class="sr-toggle">
+            <input type="checkbox" id="shadowScoreOn" checked>
+            开启跟读评分（需要麦克风）
+          </label>
         </div>
 
         <hr class="div">
@@ -471,6 +519,17 @@ hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
               <span class="teng-badge" id="azTransBadge">未配置</span>
             </div>
             <input type="password" id="azTransKey" placeholder="粘贴 Azure 翻译 Key" oninput="saveTransCfg()" style="margin-bottom:6px">
+            <select id="azTransRegion" onchange="saveTransCfg()" style="margin-bottom:6px">
+              <option value="eastasia">东亚 East Asia</option>
+              <option value="southeastasia">东南亚 SE Asia</option>
+              <option value="eastus">美国东部 East US</option>
+              <option value="westus2">美国西部 West US 2</option>
+              <option value="westeurope">西欧 West Europe</option>
+              <option value="northeurope">北欧 North Europe</option>
+              <option value="australiaeast">澳大利亚 Australia East</option>
+              <option value="japaneast">日本东部 Japan East</option>
+              <option value="global">全球端点 Global（无需区域）</option>
+            </select>
             <div style="font-size:11px;margin-bottom:5px">
               <a onclick="copyTTSKey()" style="color:var(--p);cursor:pointer;text-decoration:underline">↑ 使用与语音相同的 Key</a>
               <span style="color:var(--mu);margin-left:6px">免费 200 万字/月</span>
@@ -511,6 +570,19 @@ hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
           <div class="pbar"><div class="pfil" id="pFil"></div></div>
           <div class="ptxt" id="pTxt">— / — 句</div>
         </div>
+
+        <hr class="div">
+        <div class="sg">
+          <label class="sl">显示选项</label>
+          <label class="sr-toggle">
+            <input type="checkbox" id="hoverTransOn" onchange="sv('hoverTransOn',this.checked)">
+            悬停快译（停留 0.8s 显示中文）
+          </label>
+          <label class="sr-toggle" style="margin-top:6px">
+            <input type="checkbox" id="showAdvWordsOn" onchange="sv('showAdvWords',this.checked);renderText()">
+            显示难词标注（橙色下划线）
+          </label>
+        </div>
       </div>
 
       <!-- Library tab -->
@@ -525,8 +597,12 @@ hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
 
       <!-- Vocab tab -->
       <div id="tabVoc" style="display:none">
-        <button class="review-btn" id="reviewBtn" onclick="startReview()" disabled>🃏 开始闪卡复习</button>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <button class="review-btn" id="reviewBtn" onclick="startReview()" disabled style="margin-bottom:0;flex:1">🃏 开始闪卡复习</button>
+          <span class="srs-due-chip zero" id="srsDueChip" onclick="startDueReview()" title="今日待复习">📅 0</span>
+        </div>
         <div class="stat-chips" id="statChips"></div>
+        <div class="study-log" id="studyLogEl" style="display:none"></div>
         <div class="tag-bar-wrap" id="tagBarWrap" style="display:none">
           <div class="tag-bar-label">按标签筛选</div>
           <div class="tag-bar" id="tagBar"></div>
@@ -541,6 +617,8 @@ hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
               <option value="mastery">按熟练度</option>
             </select>
             <button class="btn btn-s btn-sm" onclick="exportVocab()" style="margin-left:auto">导出</button>
+            <button class="btn btn-s btn-sm" onclick="document.getElementById('importVocabFile').click()">导入</button>
+            <input type="file" id="importVocabFile" accept=".tsv,.txt,.csv" style="display:none" onchange="importVocabFromFile(this)">
           </div>
         </div>
         <div id="vocList"></div>
@@ -620,10 +698,29 @@ hr.div{border:none;border-top:1px solid var(--bd);margin:14px 0}
   </div>
 </div>
 
+<div id="toastBox"></div>
+
 <script>
 // ═══════════════════════════ PERSISTENCE ═══════════════════════════
 function ld(k,d){ try{ return JSON.parse(localStorage.getItem(k)||'null')??d; }catch{ return d; } }
 function sv(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+
+// ═══════════════════════════ TOAST ═══════════════════════════
+function toast(msg, type='info', duration=3000){
+  const box=document.getElementById('toastBox');
+  const el=document.createElement('div');
+  el.className=`toast-msg t-${type}`;
+  el.textContent=msg;
+  box.appendChild(el);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('in')));
+  setTimeout(()=>{
+    el.classList.remove('in');
+    setTimeout(()=>el.remove(), 250);
+  }, duration);
+}
+
+// ═══════════════════════════ COMMON WORDS (A1-B1 core ~800 words) ═══════════════════════════
+const COMMON_WORDS = new Set('i a the is are was were be been being have has had do does did will would could should may might shall can cannot must need want like know think say go come get make take see look use find give tell work call try ask feel become leave put mean keep let begin show hear play run move live believe hold bring happen write provide sit stand lose pay meet include continue set learn change lead understand watch follow stop create speak read spend grow open walk win offer remember love consider appear buy wait serve die send expect build stay fall cut reach kill remain suggest raise pass sell require report decide pull he her him his how if in into it its me my no not of on or our out she so that them then there they this to up us we what when where which who with you your an and at but by for from am also back because between both can come course day different does during each even first from good great help here high how into its just large last late later little long make more most move much new next no now number off old only other part people place point public right same school show since small some state still students such system than their then there these things through time too two under until use used very way well were where which while who why without world would year years yes yet about after again air all along always animals area around asked away began being below best between black body book both brought came certain children cities close cold color common community coming country cover cut dark days did different down during each early earth enough even ever every example eyes face family far few field find first follow food four full given goes gotten ground groups grow half hands hard head hear high himself home house however human idea important instead keep kind known land large later leave less letter light likely line long low main man means miles mind minutes more moon morning most mountain move much music near need night nothing number often once order other outside own page paper part past pattern picture place plant point possible press problem process quite real school set short side since small sometimes soon sound space story story still study sun sure sure take talk the things thought told together took trees true turn under usually voice walk want was water whole without words world years young'.split(' '));
 
 // ═══════════════════════════ CACHE ═══════════════════════════
 // Translation cache — localStorage, persists forever
@@ -808,7 +905,7 @@ function updateUsageUI(){
 // ═══════════════════════════ STATE ═══════════════════════════
 const S = {
   sentences:[], isPlaying:false, curIdx:0, roundsDone:0,
-  speed:1.0, mode:'once', playCount:3, shadowPause:3,
+  speed:ld('playSpeed',1.0), mode:ld('playMode','once'), playCount:ld('playCount',3), shadowPause:ld('shadowPause',3),
   timeLimit:0, startTime:null, timerIv:null, pending:[],
   dispMode:'en', translations:[], translating:false,
   vocab: ld('elVocab',[]),
@@ -821,12 +918,19 @@ const S = {
   azCfg: ld('azCfg',{key:'',region:'eastasia',voice:'en-GB-SoniaNeural'}),
   // translation
   azTransKey: ld('azTransKey',''),
+  azTransRegion: ld('azTransRegion','eastasia'),
   transSwitchPct: ld('transSwitchPct', 90),
 };
-S.vocab.forEach(v=>{ if(v.mastery===undefined) v.mastery=0; if(!v.tags) v.tags=[]; });
+S.vocab.forEach(v=>{ if(v.mastery===undefined) v.mastery=0; if(!v.tags) v.tags=[]; if(v.srsNext===undefined) v.srsNext=null; if(!v.srsInterval) v.srsInterval=1; });
 
 // current azure audio element
 let _azAudio = null;
+let _recog = null;       // current speech recognition instance
+let _micStream = null;   // kept alive during shadow reading to avoid repeated permission prompts
+let _azTransErrAt = 0;   // timestamp of last Azure Translator error toast (for dedup)
+const _shadowAudioUrls = new Map(); // sentIdx → blob URL of user's recording
+let _shadowAutoNext = null;         // timer that auto-advances after a good score
+let _replayAudio   = null;          // currently playing replay Audio element
 
 // ═══════════════════════════ PWA ═══════════════════════════
 let deferredInstall = null;
@@ -860,10 +964,11 @@ function saveAzCfg(){
 }
 
 function initEngineUI(){
-  document.getElementById('azKey').value        = S.azCfg.key||'';
-  document.getElementById('azRegion').value     = S.azCfg.region||'eastasia';
-  document.getElementById('azVoice').value      = S.azCfg.voice||'en-GB-SoniaNeural';
-  document.getElementById('azTransKey').value   = S.azTransKey||'';
+  document.getElementById('azKey').value          = S.azCfg.key||'';
+  document.getElementById('azRegion').value       = S.azCfg.region||'eastasia';
+  document.getElementById('azVoice').value        = S.azCfg.voice||'en-GB-SoniaNeural';
+  document.getElementById('azTransKey').value     = S.azTransKey||'';
+  document.getElementById('azTransRegion').value  = S.azTransRegion||'eastasia';
   document.getElementById('transSwitchPct').value = S.transSwitchPct||90;
   setEngine(S.engine);
   updateTransUI();
@@ -871,8 +976,10 @@ function initEngineUI(){
 
 function saveTransCfg(){
   S.azTransKey    = document.getElementById('azTransKey').value.trim();
+  S.azTransRegion = document.getElementById('azTransRegion').value;
   S.transSwitchPct = parseInt(document.getElementById('transSwitchPct').value) || 90;
   sv('azTransKey',     S.azTransKey);
+  sv('azTransRegion',  S.azTransRegion);
   sv('transSwitchPct', S.transSwitchPct);
   updateTransUI();
 }
@@ -906,7 +1013,10 @@ async function azureSpeak(text){
     },
     body: ssml,
   });
-  if(!res.ok) throw new Error(`Azure ${res.status}`);
+  if(!res.ok){
+    if(res.status===401||res.status===404) toast('Azure 语音 Key 无效或区域错误（'+res.status+'）','err');
+    throw new Error(`Azure ${res.status}`);
+  }
   addUsage(ssml.length);
   const blob = await res.blob();
 
@@ -954,10 +1064,15 @@ function loadText(){
   document.getElementById('displayMode').style.display='block';
   setOn(true); updProg();
   if(S.engine==='azure') updateUsageUI();
+  // Persist so refresh restores the text
+  sv('elCurText', txt);
+  sv('elDispMode', 'en');
 }
 function parseSents(t){ return (t.match(/[^.!?…]+[.!?…]+["'""]?\s*|[^.!?…]+$/g)||[t]).map(s=>s.trim()).filter(s=>s.length>2); }
 function renderText(){
+  const showAdv = ld('showAdvWords', true);
   const d=document.getElementById('textDisplay'); d.innerHTML=''; let wc=0;
+  const uniqueWords=new Set(); let totalLen=0; let wordCount=0;
   S.sentences.forEach((sent,si)=>{
     const blk=document.createElement('div'); blk.className='sent-block'; blk.dataset.idx=si;
     const en=document.createElement('div'); en.className='sent-en'; en.dataset.idx=si;
@@ -968,7 +1083,10 @@ function renderText(){
         sp.dataset.w=cl; sp.dataset.raw=tok.text; sp.textContent=tok.text;
         sp.onclick=e=>{e.stopPropagation();openPop(sp);};
         if(cl&&S.vocab.some(v=>v.word===cl)) sp.classList.add('sv');
-        en.appendChild(sp); if(cl) wc++;
+        // difficulty marker
+        if(showAdv && cl && cl.length>=7 && !COMMON_WORDS.has(cl)) sp.classList.add('adv');
+        en.appendChild(sp);
+        if(cl){ wc++; wordCount++; uniqueWords.add(cl); totalLen+=cl.length; }
       } else en.appendChild(document.createTextNode(tok.text));
     });
     blk.appendChild(en);
@@ -977,15 +1095,20 @@ function renderText(){
     if(!S.translations[si]) cn.classList.add('ld');
     blk.appendChild(cn); d.appendChild(blk);
   });
-  document.getElementById('metaI').textContent=`${S.sentences.length} 句 · ${wc} 词`;
+  // Compute stats
+  const avgLen = wordCount ? totalLen/wordCount : 0;
+  let diff = avgLen < 5 ? 'A2' : avgLen < 6.5 ? 'B1' : avgLen < 7.5 ? 'B2' : 'C1';
+  const mins = (wordCount/150).toFixed(1);
+  document.getElementById('metaI').textContent=`${S.sentences.length}句 · ${wc}词 · ${uniqueWords.size}独 · ${diff} · 约${mins}分钟`;
 }
 function tokenize(t){ const r=[],re=/([a-zA-Z''\-]+)|([^a-zA-Z''\-]+)/g; let m; while((m=re.exec(t))){ if(m[1]) r.push({type:'word',text:m[1]}); else r.push({type:'o',text:m[2]}); } return r; }
 function clearInput(){ document.getElementById('ti').value=''; }
-function backToInput(){ stopPlay(); document.getElementById('inputMode').style.display='block'; document.getElementById('displayMode').style.display='none'; setOn(false); }
+function backToInput(){ stopPlay(); clearShadowPanels(); document.getElementById('inputMode').style.display='block'; document.getElementById('displayMode').style.display='none'; setOn(false); sv('elCurText',''); }
 function setOn(on){ ['playBtn','stopBtn','prevBtn','nextBtn'].forEach(id=>document.getElementById(id).disabled=!on); }
 
 function setDM(m){
   S.dispMode=m; updMBtn(m);
+  sv('elDispMode', m);
   const cns=document.querySelectorAll('.sent-cn'),ens=document.querySelectorAll('.sent-en');
   if(m==='en'){ ens.forEach(e=>e.style.display=''); cns.forEach(e=>e.classList.add('hid')); }
   else if(m==='cn'){ ens.forEach(e=>e.style.display='none'); cns.forEach(e=>e.classList.remove('hid')); }
@@ -997,20 +1120,26 @@ function updMBtn(m){ document.querySelectorAll('.mb-btn').forEach(b=>b.classList
 async function azureTranslate(texts){
   const key = S.azTransKey;
   if(!key) throw new Error('no azure trans key');
-  const region = S.azCfg.region || 'eastasia';
+  const region = S.azTransRegion || 'eastasia';
   const res = await fetch(
     'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=en&to=zh-Hans',
     {
       method: 'POST',
       headers: {
         'Ocp-Apim-Subscription-Key': key,
-        'Ocp-Apim-Subscription-Region': region,
+        ...(region !== 'global' && {'Ocp-Apim-Subscription-Region': region}),
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(texts.map(t => ({ Text: t }))),
     }
   );
-  if(!res.ok) throw new Error(`Azure Translate ${res.status}`);
+  if(!res.ok){
+    if((res.status===401||res.status===404) && Date.now()-_azTransErrAt>30000){
+      _azTransErrAt=Date.now();
+      toast('Azure 翻译 Key 无效或区域错误（'+res.status+'）','err');
+    }
+    throw new Error(`Azure Translate ${res.status}`);
+  }
   const data = await res.json();
   const totalChars = texts.reduce((sum, t) => sum + t.length, 0);
   addAzTUsage(totalChars);
@@ -1038,7 +1167,6 @@ async function smartTranslate(texts){
     try{
       return await azureTranslate(texts);
     } catch(e){
-      console.warn('Azure Translate failed, falling back to MyMemory:', e);
       updateTransUI(); // refresh display
       return await mymemoryTranslateBatch(texts);
     }
@@ -1065,8 +1193,11 @@ async function fetchAllCN(){
   if(!needs.length){ S.translating=false; return; }
 
   // Batch translate remaining sentences via smart engine (up to 50 per request)
+  const total = needs.length;
+  let done = 0;
   for(let c = 0; c < needs.length; c += 50){
     const batch = needs.slice(c, c + 50);
+    setSt('pause', `翻译中 ${done}/${total} 句…`);
     try{
       const results = await smartTranslate(batch.map(x => x.s));
       batch.forEach(({i, s}, ri) => {
@@ -1076,10 +1207,13 @@ async function fetchAllCN(){
         const el = document.querySelector(`.sent-cn[data-idx="${i}"]`);
         if(el){ el.textContent = cn || '（无翻译）'; el.classList.remove('ld'); }
       });
+      done += batch.length;
+      setSt('pause', `翻译中 ${done}/${total} 句…`);
     } catch(e){
-      console.warn('smartTranslate failed:', e);
+      done += batch.length;
     }
   }
+  setSt('', '就绪');
   S.translating=false;
 }
 
@@ -1108,7 +1242,11 @@ function startPlay(){
   if(!S.sentences.length) return;
   S.isPlaying=true;
   if(S.mode==='timed'){ const m=parseInt(document.getElementById('timeSel').value); S.timeLimit=m*60000; S.startTime=Date.now(); startTimer(m*60); }
-  setPlayIcon('⏸'); setSt('play','播放中'); showBadge(); playCur();
+  setPlayIcon('⏸'); setSt('play','播放中'); showBadge();
+  // Mic is pre-warmed when user enables shadow scoring checkbox (warmMic())
+  // Just ensure it's still live before starting (e.g. user re-enabled after revoking)
+  if(S.mode==='shadow' && document.getElementById('shadowScoreOn')?.checked) warmMic();
+  playCur();
 }
 
 function pausePlay(){
@@ -1119,15 +1257,23 @@ function pausePlay(){
 }
 
 function stopPlay(){
+  const wasShadow = S.isPlaying && S.mode==='shadow';
   if(S.engine==='azure'){ stopAzAudio(); }
   else{ speechSynthesis.cancel(); }
   clrPnd(); S.isPlaying=false; S.curIdx=0; S.roundsDone=0; stopTimer();
   setPlayIcon('▶');
   document.getElementById('mBadge').style.display='none';
   setSt('','就绪'); clrHL(); updProg();
+  if(wasShadow) updateStudyLog('shadowSessions');
+  // Keep _micStream alive — it will be released in backToInput / clearShadowPanels
+  // so the user doesn't get a new permission prompt if they press play again
 }
 
-function clrPnd(){ S.pending.forEach(clearTimeout); S.pending=[]; }
+function clrPnd(){
+  S.pending.forEach(p=>typeof p==='number'?clearTimeout(p):p?.cancel?.());
+  S.pending=[];
+  if(_recog){ try{_recog.abort();}catch{} _recog=null; }
+}
 
 async function playCur(){
   if(!S.isPlaying) return;
@@ -1172,8 +1318,13 @@ async function playCur(){
 function afterSentence(){
   if(!S.isPlaying) return;
   if(S.mode==='shadow'){
-    const t=setTimeout(()=>{ S.curIdx++; playCur(); }, S.shadowPause*1000);
-    S.pending.push(t);
+    const scoreOn = document.getElementById('shadowScoreOn')?.checked;
+    if(scoreOn && hasSpeechRecog()){
+      startShadowCountdown(S.curIdx);
+    } else {
+      const t=setTimeout(()=>{ S.curIdx++; playCur(); }, S.shadowPause*1000);
+      S.pending.push(t);
+    }
   } else {
     S.curIdx++; playCur();
   }
@@ -1208,8 +1359,242 @@ function showBadge(){ const lb={once:'一次性',shadow:`影子跟读(${S.shadow
 
 function startTimer(s){ const el=document.getElementById('timerEl'); el.style.display='inline'; let r=s; const f=x=>`⏱ ${String(Math.floor(x/60)).padStart(2,'0')}:${String(x%60).padStart(2,'0')}`; el.textContent=f(r); S.timerIv=setInterval(()=>{el.textContent=f(Math.max(0,--r));if(r<=0)stopTimer();},1000); }
 function stopTimer(){ clearInterval(S.timerIv); document.getElementById('timerEl').style.display='none'; }
-function onSpeed(v){ S.speed=parseFloat(v); document.getElementById('spV').textContent=parseFloat(v).toFixed(1)+'x'; if(_azAudio) _azAudio.playbackRate=S.speed; }
-function onMode(v){ S.mode=v; document.getElementById('gN').style.display=v==='ntimes'?'block':'none'; document.getElementById('gT').style.display=v==='timed'?'block':'none'; document.getElementById('gS').style.display=v==='shadow'?'block':'none'; }
+function onSpeed(v){ S.speed=parseFloat(v); document.getElementById('spV').textContent=parseFloat(v).toFixed(1)+'x'; if(_azAudio) _azAudio.playbackRate=S.speed; sv('playSpeed',S.speed); }
+function onMode(v){ S.mode=v; document.getElementById('gN').style.display=v==='ntimes'?'block':'none'; document.getElementById('gT').style.display=v==='timed'?'block':'none'; document.getElementById('gS').style.display=v==='shadow'?'block':'none'; sv('playMode',S.mode); }
+
+// ═══════════════════════════ SHADOW READING SCORE ═══════════════════════════
+function hasSpeechRecog(){ return !!(window.SpeechRecognition||window.webkitSpeechRecognition); }
+function clearShadowPanels(){
+  document.querySelectorAll('.sr-panel').forEach(p=>p.remove());
+  _shadowAudioUrls.forEach(url=>URL.revokeObjectURL(url));
+  _shadowAudioUrls.clear();
+  if(_replayAudio){ _replayAudio.pause(); _replayAudio=null; }
+  // Release mic only if scoring is OFF; if ON keep stream alive to avoid re-prompting
+  if(!document.getElementById('shadowScoreOn')?.checked) releaseMic();
+}
+
+function startShadowCountdown(sentIdx){
+  const blk=document.querySelector(`.sent-block[data-idx="${sentIdx}"]`); if(!blk) return;
+  const old=blk.querySelector('.sr-panel'); if(old) old.remove();
+  const panel=document.createElement('div'); panel.className='sr-panel';
+  panel.innerHTML=`<div class="sr-mic-row"><div class="sr-mic-dot" id="srDot${sentIdx}"></div><span class="sr-status" id="srSt${sentIdx}">${S.shadowPause}s 后开始跟读…</span></div>`;
+  blk.appendChild(panel);
+  let cd=S.shadowPause;
+  const iv=setInterval(()=>{
+    cd--;
+    const st=document.getElementById(`srSt${sentIdx}`);
+    if(cd>0){ if(st) st.textContent=`${cd}s 后开始跟读…`; }
+    else{ clearInterval(iv); if(st) st.textContent='🎤 请跟读…'; startShadowRecord(sentIdx,panel); }
+  },1000);
+  S.pending.push({cancel:()=>clearInterval(iv)});
+}
+
+function startShadowRecord(sentIdx, panel){
+  if(!S.isPlaying) return;
+  const Recog=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+  panel.innerHTML=`
+    <div class="sr-mic-row">
+      <div class="sr-mic-dot rec" id="srDot${sentIdx}"></div>
+      <span class="sr-status" id="srSt${sentIdx}">🎤 请跟读…</span>
+    </div>
+    <div id="srLive${sentIdx}" style="font-size:12px;color:var(--mu);min-height:18px;margin-bottom:7px;font-style:italic"></div>
+    <button class="btn btn-s btn-sm" style="font-size:12px" onclick="shadowNext(${sentIdx})">跳过</button>`;
+
+  const recog=new Recog(); _recog=recog;
+  recog.lang='en-GB';
+  recog.continuous=true;       // prevent cutoff on mid-sentence pauses
+  recog.interimResults=true;
+
+  let final='', lastInterim='', hasSpeech=false, silenceTimer=null;
+
+  // If user never speaks, give up after 10s
+  const noSpeechTout=setTimeout(()=>{ try{recog.stop();}catch{} },10000);
+  S.pending.push({cancel:()=>clearTimeout(noSpeechTout)});
+
+  // Safety-net hard cap: sentence length * 100ms + 6s, max 90s
+  const hardCap=Math.min(Math.max(S.sentences[sentIdx].length*100+6000,8000),90000);
+  const hardTout=setTimeout(()=>{ try{recog.stop();}catch{} },hardCap);
+  S.pending.push({cancel:()=>clearTimeout(hardTout)});
+
+  recog.onresult=e=>{
+    if(!hasSpeech){
+      hasSpeech=true;
+      clearTimeout(noSpeechTout); // no longer need the "never spoke" timeout
+      const st=document.getElementById(`srSt${sentIdx}`);
+      if(st) st.textContent='🎤 聆听中…';
+    }
+    lastInterim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) final+=e.results[i][0].transcript+' ';
+      else lastInterim+=e.results[i][0].transcript;
+    }
+    const live=document.getElementById(`srLive${sentIdx}`);
+    if(live) live.textContent=(final+lastInterim).trim();
+
+    // Auto-stop 1.5s after speech goes silent — reset on every new result
+    clearTimeout(silenceTimer);
+    silenceTimer=setTimeout(()=>{ try{recog.stop();}catch{} },1500);
+  };
+
+  let mediaRec=null, audioChunks=[], pendingScore=null;
+
+  function stopRecording(){
+    if(mediaRec && mediaRec.state==='recording') mediaRec.stop();
+  }
+
+  function setupMediaRecorder(){
+    if(!window.MediaRecorder || !_micStream) return;
+    try{
+      mediaRec=new MediaRecorder(_micStream);
+      mediaRec.ondataavailable=e=>{ if(e.data.size>0) audioChunks.push(e.data); };
+      mediaRec.onstop=()=>{
+        const blob=new Blob(audioChunks,{type:mediaRec.mimeType||'audio/webm'});
+        _shadowAudioUrls.set(sentIdx,URL.createObjectURL(blob));
+        if(pendingScore) showShadowScore(sentIdx,pendingScore.score,pendingScore.results,pendingScore.t,panel);
+      };
+      mediaRec.start(100);
+    }catch(e){ mediaRec=null; }
+  }
+
+  recog.onend=()=>{
+    clearTimeout(noSpeechTout); clearTimeout(hardTout); clearTimeout(silenceTimer);
+    _recog=null; if(!S.isPlaying) return;
+    const t=(final+lastInterim).trim();
+    if(!t){ stopRecording(); shadowNext(sentIdx); return; }
+    const{score,results}=scoreText(S.sentences[sentIdx],t);
+    if(mediaRec && mediaRec.state==='recording'){
+      pendingScore={score,results,t};
+      mediaRec.stop(); // onstop will call showShadowScore once blob is ready
+    } else {
+      showShadowScore(sentIdx,score,results,t,panel);
+    }
+  };
+
+  recog.onerror=e=>{
+    clearTimeout(noSpeechTout); clearTimeout(hardTout); clearTimeout(silenceTimer);
+    _recog=null; stopRecording();
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      toast('麦克风权限被拒绝，已关闭跟读评分','warn');
+      document.getElementById('shadowScoreOn').checked=false;
+      shadowNext(sentIdx);
+    } else if(e.error!=='aborted') shadowNext(sentIdx);
+  };
+
+  try{
+    recog.start();
+    // Reuse the mic stream that was pre-warmed in startPlay (no second permission prompt)
+    if(window.MediaRecorder && navigator.mediaDevices){
+      const live = _micStream && _micStream.getTracks().some(t=>t.readyState==='live');
+      if(live){
+        setupMediaRecorder(); // stream already open — no permission dialog
+      } else {
+        // Fallback: stream not ready yet (e.g. permission was slow), request it now
+        navigator.mediaDevices.getUserMedia({audio:true})
+          .then(s=>{ _micStream=s; setupMediaRecorder(); })
+          .catch(()=>{});
+      }
+    }
+  }catch{ stopRecording(); shadowNext(sentIdx); }
+}
+
+function scoreText(original, recognized){
+  const norm=s=>s.toLowerCase().replace(/[^a-z'\s]/g,'').trim();
+  const oW=norm(original).split(/\s+/).filter(Boolean);
+  const rW=norm(recognized).split(/\s+/).filter(Boolean);
+  if(!oW.length) return{score:0,results:[]};
+  // LCS — order-aware word matching
+  const m=oW.length,n=rW.length;
+  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    dp[i][j]=oW[i-1]===rW[j-1]?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);
+  const hit=new Array(m).fill(false);
+  let i=m,j=n;
+  while(i>0&&j>0){ if(oW[i-1]===rW[j-1]){hit[i-1]=true;i--;j--;} else if(dp[i-1][j]>=dp[i][j-1]) i--; else j--; }
+  return{score:Math.round(dp[m][n]/m*100), results:oW.map((w,k)=>({w,ok:hit[k]}))};
+}
+
+function showShadowScore(sentIdx,score,results,recognized,panel){
+  const sc=score>=80?'sg':score>=50?'sw':'se';
+  const em=score>=80?'🌟':score>=50?'👍':'💪';
+  const wordsHtml=results.map(r=>`<span class="sr-w ${r.ok?'ok':'miss'}">${r.w}</span>`).join('');
+  const dot=document.getElementById(`srDot${sentIdx}`);
+  if(dot) dot.className='sr-mic-dot done';
+  const hasAudio=_shadowAudioUrls.has(sentIdx);
+  panel.innerHTML=`
+    <div class="sr-score-badge ${sc}">${em} ${score} 分</div>
+    <div class="sr-words">${wordsHtml}</div>
+    <div class="sr-recog">你说的："${recognized}"</div>
+    <div class="sr-acts">
+      ${hasAudio?`<button class="btn btn-s btn-sm" onclick="replayShadow(${sentIdx})">🔈 重听</button>`:''}
+      <button class="btn btn-s btn-sm" onclick="retryShadow(${sentIdx})">🔄 重试</button>
+      <button class="btn btn-p btn-sm" onclick="shadowNext(${sentIdx})">下一句 →</button>
+    </div>`;
+  // 高分自动继续（3 秒后），点重听 / 重试可取消
+  if(score>=80){
+    _shadowAutoNext=setTimeout(()=>{ _shadowAutoNext=null; shadowNext(sentIdx); },3000);
+    S.pending.push({cancel:()=>{ clearTimeout(_shadowAutoNext); _shadowAutoNext=null; }});
+  }
+}
+
+function replayShadow(sentIdx){
+  // Cancel auto-advance so replay isn't cut short
+  clearTimeout(_shadowAutoNext); _shadowAutoNext=null;
+  const url=_shadowAudioUrls.get(sentIdx); if(!url) return;
+  // Stop any currently playing replay before starting a new one
+  if(_replayAudio){ _replayAudio.pause(); _replayAudio.currentTime=0; }
+  _replayAudio=new Audio(url);
+  _replayAudio.onended=()=>{ _replayAudio=null; };
+  _replayAudio.play();
+}
+
+function shadowNext(sentIdx){
+  if(!S.isPlaying) return;
+  clearTimeout(_shadowAutoNext); _shadowAutoNext=null;
+  collapseShadowPanel(sentIdx); // keep score history visible
+  S.curIdx=sentIdx+1; playCur();
+}
+
+function collapseShadowPanel(sentIdx){
+  const blk=document.querySelector(`.sent-block[data-idx="${sentIdx}"]`);
+  const panel=blk?.querySelector('.sr-panel'); if(!panel) return;
+  const badge=panel.querySelector('.sr-score-badge');
+  const sc=badge?.className.split(' ').find(c=>['sg','sw','se'].includes(c))||'';
+  const scoreText=badge?.textContent||'';
+  const wordsHtml=panel.querySelector('.sr-words')?.innerHTML||'';
+  const recogTxt=panel.querySelector('.sr-recog')?.textContent||'';
+  const hasAudio=_shadowAudioUrls.has(sentIdx);
+  panel.innerHTML=`
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <span class="sr-score-badge ${sc}" style="font-size:14px;margin:0">${scoreText}</span>
+      ${hasAudio?`<button class="btn btn-s btn-sm" onclick="replayShadow(${sentIdx})" style="font-size:11px;padding:3px 8px">🔈 重听</button>`:''}
+      <button class="btn btn-s btn-sm" style="font-size:11px;padding:3px 8px;margin-left:auto" onclick="expandShadowPanel(${sentIdx},this)">详情 ▼</button>
+    </div>
+    <div class="sr-detail-${sentIdx}" style="display:none;margin-top:7px">
+      <div class="sr-words" style="margin-bottom:5px">${wordsHtml}</div>
+      <div class="sr-recog">${recogTxt}</div>
+    </div>`;
+}
+
+function expandShadowPanel(sentIdx,btn){
+  const blk=document.querySelector(`.sent-block[data-idx="${sentIdx}"]`);
+  const detail=blk?.querySelector(`.sr-detail-${sentIdx}`); if(!detail) return;
+  const open=detail.style.display!=='none';
+  detail.style.display=open?'none':'block';
+  btn.textContent=open?'详情 ▼':'收起 ▲';
+}
+
+function retryShadow(sentIdx){
+  clearTimeout(_shadowAutoNext); _shadowAutoNext=null;
+  if(_recog){ try{_recog.abort();}catch{} _recog=null; }
+  // Free old recording so we start fresh
+  const url=_shadowAudioUrls.get(sentIdx);
+  if(url){ URL.revokeObjectURL(url); _shadowAudioUrls.delete(sentIdx); }
+  const blk=document.querySelector(`.sent-block[data-idx="${sentIdx}"]`);
+  const panel=blk?.querySelector('.sr-panel'); if(!panel) return;
+  panel.innerHTML='';
+  startShadowRecord(sentIdx,panel);
+}
 
 // ═══════════════════════════ WORD POPUP ═══════════════════════════
 async function openPop(el){
@@ -1361,7 +1746,7 @@ function startTagAdd(word,btn){
   inp.addEventListener('blur',()=>setTimeout(()=>commit(inp.value),150));
 }
 
-function addToVocab(word,defs,cn,phonetic){ if(S.vocab.some(v=>v.word===word)) return; S.vocab.unshift({word,phonetic:phonetic||'',defs:defs||[],cn:cn||'',date:new Date().toLocaleDateString('zh-CN'),mastery:0,tags:[]}); sv('elVocab',S.vocab); renderVocab(); document.querySelectorAll(`.word[data-w="${word}"]`).forEach(el=>el.classList.add('sv')); }
+function addToVocab(word,defs,cn,phonetic){ if(S.vocab.some(v=>v.word===word)) return; S.vocab.unshift({word,phonetic:phonetic||'',defs:defs||[],cn:cn||'',date:new Date().toLocaleDateString('zh-CN'),mastery:0,tags:[],srsNext:null,srsInterval:1}); sv('elVocab',S.vocab); renderVocab(); document.querySelectorAll(`.word[data-w="${word}"]`).forEach(el=>el.classList.add('sv')); updateStudyLog('wordsAdded'); }
 function removeVocab(word){ S.vocab=S.vocab.filter(v=>v.word!==word); sv('elVocab',S.vocab); renderVocab(); document.querySelectorAll(`.word[data-w="${word}"]`).forEach(el=>el.classList.remove('sv')); }
 function cycleMastery(word){ const e=S.vocab.find(v=>v.word===word); if(!e) return; e.mastery=(e.mastery+1)%3; sv('elVocab',S.vocab); renderVocab(); }
 function setMastery(word,m){ const e=S.vocab.find(v=>v.word===word); if(!e) return; e.mastery=m; sv('elVocab',S.vocab); renderVocab(); }
@@ -1382,6 +1767,8 @@ function renderVocab(){
   document.getElementById('vocB').textContent=tot?` (${tot})`:'';
   document.getElementById('statChips').innerHTML=`<span class="sc all${S.vocFilter==='all'?' on':''}" onclick="setVF('all')">全部 ${tot}</span><span class="sc sc0${S.vocFilter==='m0'?' on':''}" onclick="setVF('m0')">学习中 ${m0}</span><span class="sc sc1${S.vocFilter==='m1'?' on':''}" onclick="setVF('m1')">熟悉 ${m1}</span><span class="sc sc2${S.vocFilter==='m2'?' on':''}" onclick="setVF('m2')">已掌握 ${m2}</span>`;
   document.getElementById('reviewBtn').disabled=tot===0;
+  renderSRSDueChip();
+  renderStudyLog();
   renderTagFilterBar();
   const list=getFiltered(),vl=document.getElementById('vocList'),ve=document.getElementById('vocEmp');
   if(!list.length){ vl.innerHTML=''; ve.style.display='block'; return; }
@@ -1419,7 +1806,7 @@ function startReview(){ if(!S.vocab.length) return; S.fcList=[...S.vocab].sort((
 function closeReview(){ document.getElementById('fcOv').style.display='none'; }
 function renderFC(){ const e=S.fcList[S.fcIdx]; if(!e) return; const tot=S.fcList.length,cur=S.fcIdx+1; document.getElementById('fcProg').textContent=`${cur} / ${tot}`; document.getElementById('fcPBF').style.width=(cur/tot*100)+'%'; document.getElementById('fcWord').textContent=e.word; document.getElementById('fcPh').textContent=e.phonetic||''; document.getElementById('fcWord2').textContent=e.word; document.getElementById('fcPh2').textContent=e.phonetic||''; document.getElementById('fcCN').textContent=e.cn||'—'; document.getElementById('fcDef').textContent=e.defs?.slice(0,1).map(d=>`[${d.pos}] ${d.def}`).join('')||''; S.fcFlipped=false; document.getElementById('fcFront').style.display=''; document.getElementById('fcBack').style.display='none'; document.getElementById('fcCard').style.background=''; }
 function flipCard(){ S.fcFlipped=!S.fcFlipped; document.getElementById('fcFront').style.display=S.fcFlipped?'none':''; document.getElementById('fcBack').style.display=S.fcFlipped?'block':'none'; document.getElementById('fcCard').style.background=S.fcFlipped?'#FAFBFF':''; }
-function rateCard(m){ const e=S.fcList[S.fcIdx]; if(!e) return; setMastery(e.word,m); fcNext(); }
+function rateCard(m){ const e=S.fcList[S.fcIdx]; if(!e) return; setMastery(e.word,m); updateSRS(e.word,m); fcNext(); }
 function fcNext(){ if(S.fcIdx<S.fcList.length-1){S.fcIdx++;renderFC();}else{closeReview();alert(`复习完成！共 ${S.fcList.length} 个单词 ✓`);} }
 function fcPrev(){ if(S.fcIdx>0){S.fcIdx--;renderFC();} }
 function fcSkip(){ fcNext(); }
@@ -1451,14 +1838,211 @@ document.addEventListener('keydown',e=>{
   else if(e.code==='Escape'){if(document.getElementById('fcOv').style.display==='flex')closeReview();else if(document.getElementById('pop').style.display==='block')closePop();else if(S.isPlaying)stopPlay();}
 });
 
+// ═══════════════════════════ HOVER TRANSLATE ═══════════════════════════
+let _hoverTimer = null, _hoverTip = null;
+document.getElementById('textDisplay').addEventListener('mouseover', e=>{
+  if(!ld('hoverTransOn', true)) return;
+  const word = e.target.closest('.word');
+  if(!word) return;
+  const w = word.dataset.w;
+  if(!w || w.length < 2) return;
+  clearTimeout(_hoverTimer);
+  _hoverTimer = setTimeout(async ()=>{
+    let cn = getCT(w);
+    if(!cn) cn = await googleTranslateWord(w);
+    if(!cn) return;
+    if(!ld('hoverTransOn', true)) return;
+    setCT(w, cn);
+    // Remove existing tip
+    if(_hoverTip) _hoverTip.remove();
+    const tip = document.createElement('div');
+    tip.className = 'hover-tip';
+    tip.textContent = cn;
+    document.body.appendChild(tip);
+    _hoverTip = tip;
+    const r = word.getBoundingClientRect();
+    const tw = tip.offsetWidth;
+    const th = tip.offsetHeight;
+    let left = r.left + r.width/2 - tw/2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    let top = r.top - th - 10;
+    if(top < 8) top = r.bottom + 8;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }, 800);
+});
+document.getElementById('textDisplay').addEventListener('mouseout', e=>{
+  const word = e.target.closest('.word');
+  if(!word) return;
+  clearTimeout(_hoverTimer);
+  if(_hoverTip){ _hoverTip.remove(); _hoverTip=null; }
+});
+
+// ═══════════════════════════ IMPORT VOCAB ═══════════════════════════
+function importVocabFromFile(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.startsWith('单词\t'));
+    let added = 0, skipped = 0;
+    lines.forEach(line=>{
+      const parts = line.split('\t');
+      if(parts.length < 1) return;
+      const word = (parts[0]||'').trim().toLowerCase();
+      if(!word) return;
+      if(S.vocab.some(v=>v.word===word)){ skipped++; return; }
+      const phonetic = (parts[1]||'').trim();
+      const cn = (parts[2]||'').trim();
+      const defStr = (parts[3]||'').trim();
+      const masteryLabel = (parts[4]||'').trim();
+      const masteryMap = {'学习中':0,'熟悉':1,'已掌握':2};
+      const mastery = masteryMap[masteryLabel] ?? 0;
+      const defs = defStr ? [{ pos:'', def: defStr }] : [];
+      S.vocab.push({word, phonetic, cn, defs, mastery, tags:[], date:new Date().toLocaleDateString('zh-CN'), srsNext:null, srsInterval:1});
+      added++;
+    });
+    sv('elVocab', S.vocab);
+    renderVocab();
+    toast(`导入完成：新增 ${added} 个，跳过 ${skipped} 个重复`, added>0?'ok':'info');
+    input.value='';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// ═══════════════════════════ STUDY LOG ═══════════════════════════
+function todayStr(){ const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; }
+function getStudyLog(){ return ld('studyLog',[]); }
+function getTodayLogEntry(){
+  const log=getStudyLog(), today=todayStr();
+  return log.find(e=>e.date===today)||null;
+}
+function updateStudyLog(field, delta=1){
+  const log=getStudyLog(), today=todayStr();
+  let entry=log.find(e=>e.date===today);
+  if(!entry){ entry={date:today,wordsAdded:0,shadowSessions:0}; log.push(entry); }
+  entry[field]=(entry[field]||0)+delta;
+  sv('studyLog', log);
+  renderStudyLog();
+}
+function calcStreak(){
+  const log=getStudyLog();
+  if(!log.length) return 0;
+  const sorted=[...log].sort((a,b)=>b.date.localeCompare(a.date));
+  let streak=0, prev=null;
+  for(const e of sorted){
+    if(!prev){ prev=e.date; streak=1; continue; }
+    const prevD=new Date(prev), curD=new Date(e.date);
+    const diff=(prevD-curD)/(1000*60*60*24);
+    if(diff===1){ streak++; prev=e.date; }
+    else break;
+  }
+  return streak;
+}
+function renderStudyLog(){
+  const el=document.getElementById('studyLogEl'); if(!el) return;
+  const log=getStudyLog(), today=todayStr();
+  const todayEntry=log.find(e=>e.date===today)||{wordsAdded:0,shadowSessions:0};
+  const totalWords=S.vocab.length;
+  const streak=calcStreak();
+  el.style.display='';
+  el.innerHTML=`<div class="study-log-title">学习记录</div>
+    <div class="study-log-today">今日新词 ${todayEntry.wordsAdded} 个 · 跟读 ${todayEntry.shadowSessions} 次</div>
+    <div class="study-log-streak">累计单词 ${totalWords} 个 · 连续学习 ${streak} 天</div>`;
+}
+
+// ═══════════════════════════ SRS (Spaced Repetition) ═══════════════════════════
+function getDueWords(){
+  const today=todayStr();
+  return S.vocab.filter(v=>{
+    if(!v.srsNext) return true; // never reviewed
+    return v.srsNext<=today;
+  });
+}
+function updateSRS(word, m){
+  const e=S.vocab.find(v=>v.word===word); if(!e) return;
+  if(!e.srsInterval) e.srsInterval=1;
+  const todayD=new Date(); todayD.setHours(0,0,0,0);
+  function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r.toISOString().slice(0,10); }
+  if(m===0){ e.srsNext=addDays(todayD,1); e.srsInterval=1; }
+  else if(m===1){ e.srsNext=addDays(todayD,3); e.srsInterval=3; }
+  else{ e.srsNext=addDays(todayD,Math.round(e.srsInterval)); e.srsInterval=Math.min(e.srsInterval*2.5,365); }
+  sv('elVocab',S.vocab);
+}
+function renderSRSDueChip(){
+  const chip=document.getElementById('srsDueChip'); if(!chip) return;
+  const due=getDueWords().length;
+  chip.textContent=`📅 ${due}`;
+  if(due>0){ chip.className='srs-due-chip'; }
+  else{ chip.className='srs-due-chip zero'; }
+}
+function startDueReview(){
+  const due=getDueWords();
+  if(!due.length){ toast('今日没有到期待复习的单词','info'); return; }
+  S.fcList=[...due].sort(()=>Math.random()-.5);
+  S.fcIdx=0; S.fcFlipped=false;
+  document.getElementById('fcOv').style.display='flex'; renderFC();
+}
+
 // ═══════════════════════════ INIT ═══════════════════════════
-document.getElementById('nIn').addEventListener('input',e=>{S.playCount=parseInt(e.target.value)||3;});
-document.getElementById('shIn').addEventListener('input',e=>{S.shadowPause=parseInt(e.target.value)||3;});
+document.getElementById('nIn').addEventListener('input',e=>{S.playCount=parseInt(e.target.value)||3; sv('playCount',S.playCount);});
+document.getElementById('shIn').addEventListener('input',e=>{S.shadowPause=parseInt(e.target.value)||3; sv('shadowPause',S.shadowPause);});
+document.getElementById('timeSel').addEventListener('change',e=>{ sv('playTimeSel',e.target.value); });
+// Restore playback settings UI
+(function restorePlaySettings(){
+  const spEl=document.getElementById('spSlider'); spEl.value=S.speed; document.getElementById('spV').textContent=S.speed.toFixed(1)+'x';
+  const mEl=document.getElementById('modeSel'); mEl.value=S.mode; onMode(S.mode);
+  document.getElementById('nIn').value=S.playCount;
+  document.getElementById('shIn').value=S.shadowPause;
+  const ts=ld('playTimeSel',''); if(ts){ document.getElementById('timeSel').value=ts; }
+})();
+// Init settings toggles
+document.getElementById('hoverTransOn').checked = ld('hoverTransOn', true);
+document.getElementById('showAdvWordsOn').checked = ld('showAdvWords', true);
+
+// ── Shadow scoring checkbox: grab mic immediately on enable ──
+// Keeping the stream alive means SpeechRecognition sees mic already in use →
+// browser skips the per-sentence permission dialog (works best on localhost/https;
+// on file:// Chrome still prompts once here, but NOT again per sentence).
+function warmMic(){
+  if(!window.MediaRecorder || !navigator.mediaDevices) return;
+  const live = _micStream && _micStream.getTracks().some(t=>t.readyState==='live');
+  if(live) return; // already held
+  navigator.mediaDevices.getUserMedia({audio:true})
+    .then(s=>{ _micStream=s; })
+    .catch(()=>{ document.getElementById('shadowScoreOn').checked=false; });
+}
+function releaseMic(){
+  if(_micStream){ _micStream.getTracks().forEach(t=>t.stop()); _micStream=null; }
+}
+document.getElementById('shadowScoreOn').addEventListener('change', e=>{
+  if(e.target.checked) warmMic(); else releaseMic();
+});
+// If scoring is already checked on load, grab mic right away
+if(document.getElementById('shadowScoreOn').checked) warmMic();
 initVoices();
 initEngineUI();
 renderVocab();
 renderLib();
 updateCacheStatsUI();
+
+// ── Restore last text session after refresh ──
+(function restoreSession(){
+  const txt = ld('elCurText','');
+  if(!txt) return;
+  document.getElementById('ti').value = txt;
+  S.sentences = parseSents(txt);
+  S.translations = new Array(S.sentences.length).fill(null);
+  S.roundsDone = 0;
+  renderText();
+  document.getElementById('inputMode').style.display = 'none';
+  document.getElementById('displayMode').style.display = 'block';
+  setOn(true); updProg();
+  // Restore display mode (bilingual etc.)
+  const dm = ld('elDispMode','en');
+  if(dm !== 'en') setDM(dm);
+  else { S.dispMode='en'; updMBtn('en'); }
+})();
 </script>
 </body>
 </html>
